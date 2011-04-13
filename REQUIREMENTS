@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+# 
+# The following packages are required. If you have distutils,
+# virtualenv and pip installed you can execute this file to download
+# them.
+# 
+REQUIREMENTS=PyYAML==3.09
+# 
+# You might be able to substitute another version, but this is tested using
+# this one:
+# 
+PYTHON=python2.7
+#
+# If you don't have virtualenv and pip installed, you can execute this
+# file with the argument --sudo-metarequirements to download and install
+# them.
+# 
+if [ "$1" == --sudo-metarequirements ]; then
+    curl http://python-distribute.org/distribute_setup.py |
+        sudo "$PYTHON" &&
+    curl https://github.com/pypa/pip/raw/master/contrib/get-pip.py |
+        sudo "$PYTHON" &&
+    sudo pip install --upgrade virtualenv
+fi
+#
+virtualenv --no-site-packages --python="$PYTHON" .
+./bin/pip install $REQUIREMENTS
