@@ -4,7 +4,7 @@
 # virtualenv and pip installed you can execute this file to download
 # them.
 # 
-REQUIREMENTS=PyYAML==3.09
+REQUIREMENTS="greenlet>=0.3"
 # 
 # You might be able to substitute another version, but this is tested using
 # this one:
@@ -20,7 +20,7 @@ if [ "$1" == --sudo-metarequirements ]; then
         sudo "$PYTHON" &&
     curl https://github.com/pypa/pip/raw/master/contrib/get-pip.py |
         sudo "$PYTHON" &&
-    sudo pip install --upgrade virtualenv
+    sudo pip install virtualenv
 fi
 #
 virtualenv --no-site-packages --python="$PYTHON" .
