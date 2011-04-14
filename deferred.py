@@ -1,68 +1,114 @@
 #!bin/python
+import operator
 
-class MultipleResultException(Exception):
-    message = "Cannot resolve/reject a not-unresolved Deferred()."
+class Future(object):
+    """Unpythonicish convenient minimal futures."""
     
-    def __init__(self):
-        Exception.__init__(self, self.message)
-
-
-class Deferred(object):
     _null_argument = object()
-    ignore_multiple_results = True
     
     def __init__(self, value=_null_argument):
-        if value is not _null_argument:
-            self.state = "resolved"
-            self.value = value
-        else:
-            self.state = "unresolved"
+        if value != _null_argument:
+            self._value = value
         
-        self.resolved_handlers = []
-        self.rejected_handlers = []
+        self.handlers = []
     
-    def when_resolved(self, *handlers):
-        if self.state == "unresolved":
-            self.resolved_handlers.extend(handlers)
-        else if self.state == "resolved":
-            for handler in handlers:
-                handler(self.value)
+    @property
+    def value(self):
+        return self._value
     
-    def when_rejected(self, *handlers):
-        if self.state == "unresolved":
-            self.resolved_handlers.extend(handlers)
-        else if self.state == "rejected":
-            for handler in handlers:
-                handler(self.reason)
-    
-    def resolve(self, value):
-        if self.state != "unresolved":
-            if self.ignore_duplicate_results:
-                return
-            else:
-                raise MultipleResultException()
-        else:
-            self.state = "resolved"
-            self.value = value
+    @value.setter
+    def value(self, value):
+        if not hasattr(self, "_value"):
+            self._value = value
             
-            for handler in self.resolved_handlers:
+            for handler in self.handlers:
                 handler(value)
             
-            del self.resolved_handlers
-            del self.rejected_handlers
+            del self.handlers
     
-    def reject(self, reason=None):
-        if self.state != "unresolved":
-            if self.ignore_duplicate_results:
-                return
-            else:
-                raise MultipleResultException()
+    def then(self, *handlers):
+        if hasattr(self, "_value"):
+            for handler in handlers:
+                handler(self._value)
         else:
-            self.state = "rejected"
-            self.reason = reason
+            self.handlers.extend(fs)
+    
+    # operations with futures produce futures
+    
+    def __add__(self, other):
+        return Future.Call(operator.add, self, other)
+    
+    def __sub__(self, other):
+        return Future.Call(operator.sub, self, other)
+    
+    def __mul__(self, other):
+        return Future.Call(operator.mul, self, other)
+    
+    def __div__(self, other):
+        return Future.Call(operator.mul, self, other)
+    
+    def __floordiv__(self, other):
+        return Future.Call(operator.floordiv, self, other)
+    
+    def __truediv__(self, other):
+        return Future.Call(operator.truediv, self, other)
+    
+    def __mod__(self, other):
+        return Future.Call(operator.mod, self, other)
+    
+    def __abs__(self, other):
+        return Future.Call(operator.abs, self, other)
+    
+    def __neg__(self):
+        return Future.Call(operator.neg, self)
+    
+    def __post__(self):
+        return Future.Call(operator.pos, self)
+    
+    def __invert__(self):
+        return Future.Call(operator.invert, self, other)
+    
+    def __pow__(self, other):
+        return Future.Call(operator.pow, self, other)
+    
+    def __rshift__(self, other):
+        return Future.Call(operator.rshift, self, other)
+    
+    def __lshift__(self, other):
+        return Future.Call(operator.lshift, self, other)
+    
+    def __xor__(self, other):
+        return Future.Call(operator.xor, self, other)
+    
+    def __and__(self, other):
+        return Future.Call(operator.and, self, other)
+    
+    def __or__(self, other):
+        return Future.Call(operator.or, self, other)
+    
+    def __getitem__(self, key):
+        return Future.Call(operator.getitem, self, key)
+    
+    class Call(Future):
+        def __init__(self, f, *args):
+            Future.__init__(self)
             
-            for handler in self.rejected_handlers:
-                handler(reason)
+            self.f_future = future(f)
+            self.arg_futures = [ future(arg) for arg in args ]
             
-            del self.resolved_handlers
-            del self.rejected_handlers
+            call = functools.partial(self.f_future.then,
+                                     lambda value: self.callback(value))
+            
+            for arg_future in self.arg_futures:
+                call = functools.partial(arg_future.then, call)
+            
+        def callback(self, value):
+            self.value = self.f_future.value(*[arg.value for arg in self.arg_futures])
+
+def future(value=Future._null_argument):
+    if isinstance(value, Future):
+        return value
+    else:
+        return Future(value)
+
+
