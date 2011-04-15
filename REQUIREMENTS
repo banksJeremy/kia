@@ -4,7 +4,7 @@
 # virtualenv and pip installed you can execute this file to download
 # them.
 # 
-REQUIREMENTS="greenlet>=0.3,<0.4"
+REQUIREMENTS="M2Crypto==0.21.1"
 # 
 # You might be able to substitute another version, but this is tested using
 # this one:

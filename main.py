@@ -1,68 +1,24 @@
 #!bin/python
-import functools
-import greenlet
+import M2Crypto
+import hashlib
+import tempfile
 
-class Generator(object):
-    """A greenlet-based generator implementation.
-    
-    Use the @generator decorator on a function using the generate() function
-    to yield values. .next() and .send() behave as the built-in. Non-generator
-    functions called from generators can call generate() themselves, allowing
-    things like generate_from(), which behaves like the proposed "yield from"
-    keyword. """
-    
-    def __init__(self, f, *a, **kw):
-        self.f = f
-        self.a = a
-        self.kw = kw
-        
-        self.greenlet = greenlet.greenlet(self.__switched_out_call)
-        self.greenlet.switch() # will immidiately switch out
-    
-    def __iter__(self):
-        return self
-    
-    def __switched_out_call(self):
-        greenlet.getcurrent().parent.switch()
-        self.f(*self.a, **self.kw)
-    
-    def next(self):
-        return self.send(None)
-    
-    def send(self, value):
-        result = self.greenlet.switch(value)
-        
-        if self.greenlet.dead:
-            raise StopIteration()
-        else:
-            return result
+# Right now just trying to figure out how to do RSASSA-PSS as
+# recommended in Colin Percival's "Everyhting you need to know
+# about cryptography in 1 hour" (http://goo.gl/QD92C).
 
-def generator(f):
-    return functools.partial(Generator, f)
+# I was doing it with PyCrypto until an SO post told me that was
+# no longer what the cool kids were using, and so M2Crypto it is.
 
-def generate(value):
-    return greenlet.getcurrent().parent.switch(value)
+message = "Hello World"
+digest = hashlib.sha256(message).digest()
+key = M2Crypto.RSA.gen_key(2048, 65537, lambda: None)
 
-def generate_from(iterable):
-    # Generates all of the values from a generator, returning the last value
-    # passed into the generator.
-    
-    result = None
-    
-    for value in iterable:
-        result = generate(value)
-    
-    return result
+signature = key.sign(digest, "sha256")
 
-@generator
-def oneTo(n):
-    for x in range(1, n + 1):
-        generate(x)
+with tempfile.NamedTemporaryFile() as f:
+    key.save_pub_key(f.name)
+    pub = M2Crypto.RSA.load_pub_key(f.name)
 
-@generator
-def oneTwo(n, m):
-    generate_from(oneTo(n))
-    generate_from(oneTo(m))
-    generate_from([10, 20])
-
-print list(oneTwo(10, 5))
+print pub.verify(digest, signature, "sha256")
+print pub.sign(digest, "sha256") # segfault instead of error? great.
