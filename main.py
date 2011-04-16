@@ -1,24 +1,34 @@
 #!bin/python
-import M2Crypto
-import hashlib
-import tempfile
+import json
+import time
 
-# Right now just trying to figure out how to do RSASSA-PSS as
-# recommended in Colin Percival's "Everyhting you need to know
-# about cryptography in 1 hour" (http://goo.gl/QD92C).
+from crypto import Key
 
-# I was doing it with PyCrypto until an SO post told me that was
-# no longer what the cool kids were using, and so M2Crypto it is.
+database = {}
 
-message = "Hello World"
-digest = hashlib.sha256(message).digest()
-key = M2Crypto.RSA.gen_key(2048, 65537, lambda: None)
+def update(ascii_key, message, signature):
+    key = Key(ascii_key)
+    
+    if key.verify(message, signature):
+        address = key.pub_key_digest()
+        new = json.loads(message)
+        
+        if address not in database or database[address]["TIMESTAMP"] < new["TIMESTAMP"]:
+            database[address] = new
+        else:
+            print("Updated failed: older than current entry")
+    else:
+        print("Update failed: key verification failed")
 
-signature = key.sign(digest, "sha256")
+local_key = Key()
+local_entry = {
+    "TIMESTAMP": int(time.time()),
+    "A": "127.0.0.1"
+}
 
-with tempfile.NamedTemporaryFile() as f:
-    key.save_pub_key(f.name)
-    pub = M2Crypto.RSA.load_pub_key(f.name)
+message = json.dumps(local_entry)
+signature = local_key.sign(message)
 
-print pub.verify(digest, signature, "sha256")
-print pub.sign(digest, "sha256") # segfault instead of error? great.
+update(local_key.pub_as_ascii, message, signature)
+
+print(database)
