@@ -1,7 +1,6 @@
-#!/usr/bin/env coffee --compile
-# run this file to compile it
+#!/usr/bin/env coffee
 
-ndns = require "./ndns" # available via npm
+ndns = require "./ndns"
 
 # Blidingly copying to make something work on my computer.
 

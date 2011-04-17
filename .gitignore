@@ -4,3 +4,4 @@ include/
 lib/
 dist/
 *.pyc
+*/*.pyc

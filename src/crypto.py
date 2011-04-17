@@ -1,4 +1,4 @@
-#!bin/python
+#!../bin/python
 import base64
 import hashlib
 import tempfile
@@ -42,7 +42,18 @@ class Key(object): # trolololol
     def __repr__(self):
         return "{0}(as_ascii={1!r})".format(type(self).__name__, self.as_ascii)
     
+    _pub = None
     _pub_as_ascii = None
+    
+    @property
+    def pub(self):
+        if self.type == "public":
+            return self
+        else:
+            if self._pub is None:
+                self._pub = type(self)(self.pub_as_ascii)
+            
+            return self._pub
     
     @property
     def pub_as_ascii(self):
@@ -55,8 +66,8 @@ class Key(object): # trolololol
                     
                     f.seek(0)
                     self._pub_as_ascii = f.read()
-                
-                return self._pub_as_ascii
+            
+            return self._pub_as_ascii
     
     def digest(self, message):
         return hashlib.sha256(message).digest()
@@ -70,14 +81,43 @@ class Key(object): # trolololol
         else:
             raise Exception("Private key required to sign messages.")
     
-    def pub_key_digest(self):
-        # placeholderesque. this depends on the formatting of the encoded
-        # key, which is silly.
+    _domain_id = None
+    
+    @property
+    def domain_id(self):
+        # this is a nonstandard way of generating an identifier for a
+        # key. it's used for "domain names".
+        # 
+        # it is not particularly intelligent, but I see know reason why
+        # it shouldn't work fine.
+        # 
+        # Strip the padding and spacing from the radix64ed public key, sha256
+        # it, lowercase-base32-encode the digest and strip the padding from
+        # that as well.
         
-        digest = self.digest(self.pub_as_ascii)
-        base32ed = base64.b32encode(digest)
-        cleaned = base32ed.replace("=", "").lower()
-        return cleaned
+        if self._domain_id is None:
+            before = True
+            stripped_key = ""
+        
+            for line in self.pub.as_ascii.split("\n"):
+                stripped_line = line.strip("\n\r\t =")
+            
+                if before:
+                    if stripped_line != "-----BEGIN PUBLIC KEY-----":
+                        before = False
+                else:
+                    if stripped_line == "-----END RSA PRIVATE KEY-----":
+                        break
+                    else:
+                        stripped_key += stripped_line
+        
+            digest = self.digest(stripped_key)
+            base32ed = base64.b32encode(digest)
+            cleaned = base32ed.replace("=", "").lower()
+            
+            self._domain_id = cleaned
+        
+        return self._domain_id
 
 def main():
     import crypto
@@ -85,11 +125,9 @@ def main():
     print "Generating keypair..."
     
     private = crypto.Key()
-    public = crypto.Key(private.pub_as_ascii)
+    public = private.pub
     
-    print "Private key:", private
-    print "Public key:", public
-    print "Public key digest:", public.pub_key_digest()
+    print "Key id:", public.domain_id
     
     message = "Hello, world!"
     signature = private.sign(message)

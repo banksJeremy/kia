@@ -1,6 +1,6 @@
 python = python2.7
 
-.PHONY: help run-peer run-dns clean purge install-metarequirements
+.PHONY: help run-peer run-dns clean purge virtualenv install-virtualenv-and-pip
 
 help:
 	# make help:
@@ -21,7 +21,7 @@ help:
 	#   
 	#     removes built files and virtualenv environment.
 	#   
-	#   sudo make install-metarequirements
+	#   sudo make install-virtualenv-and-pip
 	#   
 	#     installs distribute, pip and virtualenv (globally).
 	#     make will probably fail without these.
@@ -31,13 +31,13 @@ run-peer: bin/$(python) lib/$(python)/site-packages/M2Crypto
 	# ============
 	bin/$(python) src/main.py
 
-run-dns: dist
+run-dns: dist/
 	# Running DNS Server
 	# ==================
 	coffee --compile --print > dist/dns.js
 	node dist/dns.js
 
-dist:
+dist/:
 	# Making Build Directory
 	# ======================
 	mkdir dist
@@ -54,10 +54,11 @@ lib/$(python)/site-packages/M2Crypto: bin/pip
 	bin/pip install "M2Crypto==0.21.1"
 
 bin/pip: bin/$(python)
-	# Verifying Presence of pip
-	# =========================
+	# Verifying Availabiltity of pip
+	# ==============================
 	pip --version
 
+virtualenv: bin/$(python)
 bin/$(python):
 	# Initializing virtualenv
 	# =======================
@@ -68,7 +69,7 @@ purge:
 	# =====================================
 	rm -rf `cat .gitignore`
 
-install-metarequirements:
+install-virtualenv-and-pip:
 	# Downloading and Installing distribute, pip and virtualenv
 	# =========================================================
 	curl http://python-distribute.org/distribute_setup.py |          \

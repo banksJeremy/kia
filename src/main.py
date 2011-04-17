@@ -1,42 +1,34 @@
-#!bin/python
-import json
+#!../bin/python
+import properjson as json
 import time
+import base64
 
-from crypto import Key
+import crypto
 
-database = {}
-
-def update(ascii_key, message, signature):
-    key = Key(ascii_key)
+def generate_localhost_domain_entry():
+    key = crypto.Key()
     
-    if key.verify(message, signature):
-        address = key.pub_key_digest()
-        new = json.loads(message)
-        
-        if address not in database or
-           database[address]["version"] < new["version"]:
-            database[address] = new
-        else:
-            print("Updated failed: older than current entry")
-    else:
-        print("Update failed: key verification failed")
-
-local_key = Key()
-
-data = json.dumps({
-    "version": int(time.time()),
-    "entries": {
-        "@": {
-            "A": "127.0.0.1"
-        },
-        "www": {
-            "A": "127.0.0.1"
+    entry = {
+        "timestamp": int(time.time()),
+        "records": {
+            "@": {
+                "A": "127.0.0.1"
+            },
+            "www": {
+                "A": "127.0.0.1"
+            }
         }
     }
-})
+    
+    json_entry = json.dumps(entry)
+    
+    signed_entry = {
+        "id": key.domain_id,
+        "public_key": key.pub_as_ascii,
+        "entry": json_entry,
+        "signature": base64.b64encode(key.sign(json_entry))
+    }
+    
+    return signed_entry
 
-message = json.dumps({
-    "key": key.pub_as_ascii
-    "data": local_entry
-    "signature": key.sign(local_entry)
-})
+print json.dumps(generate_localhost_domain_entry(), indent=4)
