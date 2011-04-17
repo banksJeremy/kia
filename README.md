@@ -3,20 +3,26 @@ dnesque
 
 [github.com/jeremybanks/dnesque](https://github.com/jeremybanks/dnesque)
 
-_**tl;dr:** A decentralized, secure (though not anonymous) system for distributing DNS records for domains identified by cryptographic keys and the top-level domains .nsq through a peer-to-peer system as well as through the browser using HTTP._
+Short Summary
+-------------
 
-Description
------------
+dnesque is a decentralized, secure (though not anonymous) system for distributing DNS records of domains identified by cryptographic keys with the top-level domain `.nsq`, using a peer-to-peer system as well as through the browser using regular HTTP.
 
-I don't genuinely know enough about DNS or cryptography to be able to design this system well, or be sure of its security, but I thought it would be interesting to think about how I would do it, and maybe give it a shot.
+Caveat
+------
 
-I'll call the system **dnesque** and use the top-level-domain `.nsq`.
+dnesque is mostly brainstorming at the moment, almost nothing has actually been coded.
+
+I am fairly ignorant about both DNS and cryptography so please consider this an experiment, not a serious project.
+
+Overview
+--------
 
 Normally, when you enter a domain in your browser, your computers sends a request to your ISP's DNS servers to lookup the IP address corresponding to that name. Your ISP's servers are connected to a hierarchical network of DNS servers with the root nameservers maintained by ICANN.
 
-dnesque will run on your computer and handle requests for `.nsq` domains itself, without consulting the normal DNS.
+dnesque will run on your computer (typically, it doesn't need to) and handle requests for `.nsq` domains without consulting the normal DNS.
 
-dnesque is based on public-key cryptography. to generate a new "domain name", generate a keypair and hash the public key. This will give you a domain like `http://pv3bne7tmebbe5peg3y3zwi2nagmo5eijhzcckudqdmilolx2vcq.nsq/`.
+dnesque is based on [public-key cryptography](http://en.wikipedia.org/wiki/Public-key_cryptography). to generate a new "domain name", generate a keypair and hash the public key. This will give you a domain like `http://pv3bne7tmebbe5peg3y3zwi2nagmo5eijhzcckudqdmilolx2vcq.nsq/`.
 
 The DNS records containing the IP addresses of the servers used by the domain are signed using the private key. This way the client (using the public key, which is provided with the record). This makes it impossible to create a DNS record for a domain without controlling the key used to create it.
 
