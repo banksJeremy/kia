@@ -1,7 +1,6 @@
 #!../bin/python
 # We won't be varying our json configuration, but don't want to allow
 # anything nonstandard, so we'll use these for convenince.
-
 import json
 import functools
 

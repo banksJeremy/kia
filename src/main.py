@@ -1,9 +1,9 @@
 #!../bin/python
-import properjson as json
 import time
 import base64
 
 import crypto
+import properjson as json
 
 def generate_localhost_domain_entry():
     key = crypto.Key()
