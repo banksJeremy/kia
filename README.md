@@ -63,5 +63,6 @@ are scary and not all worked out yet, so they're not here. After a record is a c
 License (Public Domain)
 -----------------------
 
-This software and related files are released under the
-[CC0 1.0 Public Domain Dedication](http://creativecommons.org/publicdomain/zero/1.0/).
+This software and related files are released under the [CC0 1.0 Public Domain Dedication](http://creativecommons.org/publicdomain/zero/1.0/).
+
+However it uses libraries that are not public domain. They'll all be permissive MIT-style licenses, but since things aren't stable I'm not bothering to include the details here yet.

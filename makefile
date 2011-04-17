@@ -1,6 +1,6 @@
 python = python2.7
 
-.PHONY: help run-peer run-dns clean purge virtualenv install-virtualenv-and-pip
+.PHONY: help run-peer run-dns clean virtualenv purge install-virtualenv-and-pip
 
 help:
 	# make help:
@@ -26,7 +26,9 @@ help:
 	#     installs distribute, pip and virtualenv (globally).
 	#     make will probably fail without these.
 
-run-peer: bin/$(python) lib/$(python)/site-packages/M2Crypto
+run-peer: bin/$(python) \
+          lib/$(python)/site-packages/twisted \
+          lib/$(python)/site-packages/M2Crypto
 	# Running Peer
 	# ============
 	bin/$(python) src/main.py
@@ -52,6 +54,11 @@ lib/$(python)/site-packages/M2Crypto: bin/pip
 	# Installing M2Crypto
 	# ===================
 	bin/pip install "M2Crypto==0.21.1"
+
+lib/$(python)/site-packages/twisted: bin/pip
+	# Installed Twisted
+	# =================
+	bin/pip install Twisted==11.0.0
 
 bin/pip: bin/$(python)
 	# Verifying Availabiltity of pip
