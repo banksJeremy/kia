@@ -6,7 +6,7 @@ dnesque
 Short Summary
 -------------
 
-dnesque is a decentralized, secure (though not anonymous) system for distributing DNS records of domains identified by cryptographic keys with the top-level domain `.nsq`, using a peer-to-peer system as well as through the browser using regular HTTP.
+dnesque is a decentralized, secure (though not anonymous) system for distributing DNS records of domains identified by cryptographic keys with the top-level domain `.nsq`, using a peer-to-peer system as well as regular HTTP.
 
 Caveat
 ------
@@ -36,35 +36,67 @@ The dnesque software has three parts:
 
 2. A dnesque-DNS bridge connected to a client, allowing systems and software to access dnesque records using the conventional DNS protocol.
 
-3. A browser plugin connected to a client, allowing websites the communicate dnesque information directly *(optional but strongly recommended)*.
+3. A browser plugin connected to a client, allowing websites the communicate dnesque information directly *(optional but recommended)*.
 
-### Browser/HTTP Interface
+dnesque clients and bridges can be configured to allow other systems to use them over the network.
 
-The MIME type `text/x-dnesque` will be used for files containing dnesque records. When a browser loads one of these it will load it into the dnesque system (which provides a JSON API to talk to local software). This provides an easy way for users to load updated DNS entires manually.
+### Browser Plugin / HTTP System
 
-HTTP headers (and their `<meta>` tag equivalents) can be used to provide dnesque information behind-the-scenes (not user-initiated). By default the system will check the `/_.json.nsq` path on a server for updated dnesque records. The header `x-dnesque-data` can be used to specify an alternate path.
+The browser plugin can obtain dnesque information from the server automatically. By default the path `/dnesque.json` will be checked for a dnesque data file. A different path (can be cross-domain) can be specified using the header `x-dnesque-data-path`.
 
-The `x-dnesque-data-domains` can be used to identify other domains that the data file includes records of. For example, a page could include a link to records of any domain it links to, which the client could load if it didn't already know any of the relevant domains.
+The header `x-dnesque-data-known-ids` can be a comma-separated list of domains that the associated data file may have information about. If omitted the data is assumed to be associated with the current domain.
 
-Pages accessed using ordinary domain names could send the `x-dnesque-id` header to identify their dnesque ID (hashed key, the part of the domain before `.nsq`) as a fallback if their ordinary domains are taken down (Wikileaks, PokerStars, I'm looking at you).
+Normal HTTP caching should be applied to the dnesque data paths.
 
-Finally, `x-dnesque-peer` can be used to identify the IP address and port of a dnesque client/peer (the same software as the user is running in the background). This can be used as another source of information for data about the current domain or any linked domains via the peer-to-peer system.
+`x-dnesque-canonical-domain` can specify a canonical domain name for a site. If the site's IP address changes and does not match the one specified by the canonical domain name, the user is notified (this may work with normal DNS names as well).
 
-(`x-dnesque-version` may optionally be specified, the default is `1`.)
+Through this the dnesque system can be used to authenticate and provide a fallback for sites that operate over normal DNS.
+
+The plugin will probably only be activated when viewing HTML documents. These headers' corresponding `<meta>` tags are also supported.
+
+#### Non-browser HTTP Support
+
+Without the browser plugin, dnesque clients may look for updates at the `x-dnesque-data-path` provided by a `GET /`, or at `/dnesque.json`.
+
+**The simplest way of supporting dnesque** is just to create a record and put it at `/dnesque.json` on your server. Replace it when you want to make changes. Without running a client yourself you rely on your record being distributed to the network by the clients of visitor to your site, but you can make updates available directly.
+
+### Data Format - `text/x-dnesque`
+
+dnesque data files can contain dnesque records and lists of peer clients. If it has a single item, that item may be the root JSON object. Otherwise the root object should be an array.
+
+    {
+        "type": "record",
+    
+        "id": "[the second level of the domain, based on hashed public key]",
+        "public_key": "[radix64-encoded public key]",
+    
+        "record": "[json encoded record (timestamped)]",
+        "signature": "[base64-encoded signature]"
+    }
+    
+    {
+        "type": "peer",
+    
+        "host": "[ip address a domain name (DNS or dnesque)]:[port]",
+    
+        "known-ids": [
+            [optional list of string ids of domains this peer knows;
+             this will be used to prioritize this peer if information
+             about those domains is needed]
+        ]
+    }
 
 ### Peer-to-Peer System
 
-When you first run the client it will have a single peer hard-coded in (my server). It will save known peers between sessions so that hopefully it will only need to connect to mine once.
+the client begins with a single known peer: my server. dnesque asks known peers for new peers until it has enough. peers are saved between sessions.
 
-When it comes online for the first time, or at any time it doesn't have enough peers, it will query known peers and ask for lists of new peers. It will used a bloom-filter to "ensure" that it doesn't get duplicate peers.
+Let nearness describe how many non-direct paths one peer has to connect to another peer (connections through multiple peers count for less): over time dnesque attempts to spread out dense clumps of peers, so that the network's density is more homogeneous. 
 
-Over time systems with large numbers of peers will disconnect from each other, resulting in the peer network being more spread-out and less centralized.
-
-When a client is asked for a domain that it doesn't know it will query peers for it. Results may not be available immediately. If peers don't have information they're asked for they will in turn query their peers for it, the requests propagating out through the network (bloom-filters will also be used here to reduce peers getting polled multiple times). If they get a result they will push it back to the client that initially requested it.
+When a client is looking for information about a domain (either because a user has requested it or it is concerned that known data has become out of data) it sends requests to nearby peers. Clients remember what peers have requested information from them, and prioritize passing that information along if they become aware of it.
 
 ### Details
 
-are scary and not all worked out yet, so they're not here. After a record is a certain age it will look around for updates to it, and updates to records that you know peers have outdated versions of will be pushed to them, but I don't want to get into that here.
+Don't exist yet. 
 
 License and Credits
 -------------------
