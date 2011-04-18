@@ -96,7 +96,7 @@ When a client is looking for information about a domain (either because a user h
 
 ### Details
 
-Don't exist yet. 
+Don't exist yet. Updated records are pushed between clients (as well as non-updated records being pushed around randomly or something). If clients set a limit on the size of their local databases they can forget old records that they know are available in a large enough portion of their peers.
 
 License and Credits
 -------------------
@@ -105,9 +105,10 @@ This software and related files are released under the [CC0 1.0 Public Domain De
 
 dnesque was created by Jeremy Banks <<jeremy@jeremybanks.ca>>. A full list of contributors [may be found though GitHub](https://github.com/jeremybanks/dnesque/contributors).
 
-dnesque may use the following software/libraries. They are available under  MIT and BSD licenses:
+dnesque may use the following software/libraries. They are available under  MIT/BSD-style licenses:
 
 - [virtualenv](http://www.virtualenv.org/) (Python environment manager)
+- [Distribute](http://packages.python.org/distribute/) (Python module distribution manager)
 - [pip](http://www.pip-installer.org/) (Python package manager)
 - [Twisted](http://twistedmatrix.com/) (Python networking framework)
 - [M2Crypto](http://chandlerproject.org/Projects/MeTooCrypto) (Python OpenSSL wrapper)

@@ -9,8 +9,8 @@ help:
 	# make help:
 	# 
 	#   sudo make install-virtualenv-and-pip
-	#                 - globally installs virtualenv and pip, which are
-	#                   required for this makefile to function.
+	#                 - if missing, globally installs distribute, virtualenv
+	#                   and pip, as required other makefile commands.
 	#   
 	#   make run-peer - runs a dnesque client/peer.
 	#   make run-dns  - runs a DNS server connected to a client.
@@ -50,9 +50,12 @@ purge: clean
 install-virtualenv-and-pip:
 	# Downloading and Installing distribute, pip and virtualenv (globally)
 	# ====================================================================
+	$(python) -c "import distutils"  || \
 	curl http://python-distribute.org/distribute_setup.py | "$(python)"
-    curl https://github.com/pypa/pip/raw/master/contrib/get-pip.py | "$(python)"
-	sudo pip install virtualenv
+	$(python) -c "import pip"        || \
+	curl https://github.com/pypa/pip/raw/1.0/contrib/get-pip.py | "$(python)"
+	$(python) -c "import virtualenv" || \
+	pip install virtualenv
 
 dist/:
 	# Making Build Directory
