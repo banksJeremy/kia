@@ -9,53 +9,41 @@ import twisted.internet.reactor
 import properjson as json
 
 class JSONRPCResource(twisted.web.resource.Resource):
-    # Responds to requests according to the JSON-RPC 1.0 specification.
-    # It also supports HTML-form-style POSTs using (only) the key "jsonrpc".
-    
-    def render_GET(self, request):
-        request.setHeader("Content-Type", "text/html")
-        
-        return("<head><title>JSON RPC Test Form</title>"
-               "<body><form action=\"/jsonrpc\" method=\"post\">"
-               "<textarea name=\"jsonrpc\">"
-               "{\"method\": \"test\", \"params\": [], \"id\": \"test!\" }"
-               "</textarea>"
-               "<input type=\"submit\" />"
-               "</form>")
+    # Responds to POSTs according to the JSON-RPC 1.0 specification.
     
     def render_POST(self, request):
         request.setHeader("Content-Type", "application/json")
         
-        content = request.content.read()
+        body = request.content.read()
         
-        if content.startswith("jsonrpc="):
-            json_content = urllib.unquote_plus(content.partition("=")[2])
-        else:
-            json_content = urllib.unquote(content)
+        json_body = urllib.unquote(body)
         
         call_id = None
         
         try:
-            call = json.loads(json_content)
+            call = json.loads(json_body)
             
-            call_id = call["id"] if "id" in call else None
+            if "id" in call:
+                call_id = call["id"]
             
             result = self.handle(call["method"], call["params"])
             
-            return json.dumps({
+            response = {
                 "result": result,
                 "error": None,
                 "id": call_id
-            })
+            }
         except Exception, exception:
-            return json.dumps({
+            response = {
                 "result": None,
                 "error": {
                     "type": type(exception).__name__,
                     "description": str(exception)
                 },
                 "id": call_id
-            })
+            }
+        
+        return json.dumps(response)
     
     def handle(self, method, params):
         if method == "test":
@@ -64,6 +52,8 @@ class JSONRPCResource(twisted.web.resource.Resource):
             raise Exception("No such method!")
     
     def serve(self, port):
+        # Starts listening on the specified port for requests to /jsonrpc.
+        
         root = twisted.web.resource.Resource()
         root.putChild("jsonrpc", self)
         
