@@ -3,5 +3,5 @@ bin/
 include/
 lib/
 dist/
+build/
 *.pyc
-*/*.pyc
