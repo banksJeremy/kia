@@ -18,21 +18,27 @@ I am fairly ignorant about both DNS and cryptography so please consider this an 
 Overview
 --------
 
-Normally, when you enter a domain in your browser, your computers sends a request to your ISP's DNS servers to lookup the IP address corresponding to that name. Your ISP's servers are connected to a hierarchical network of DNS servers with the root nameservers maintained by ICANN.
+### Purpose
 
-dnesque will run on your computer (typically, it doesn't need to) and handle requests for `.nsq` domains without consulting the normal DNS.
+The current domain name system makes it difficult to communicate online without relying on and paying for the services of a small group of companies/organizations, whose objectives may not align with your own. It would be nice if this weren't the case.
 
-dnesque is based on [public-key cryptography](http://en.wikipedia.org/wiki/Public-key_cryptography). to generate a new "domain name", generate a keypair and hash the public key. This will give you a domain like `http://pv3bne7tmebbe5peg3y3zwi2nagmo5eijhzcckudqdmilolx2vcq.nsq/`.
+dnesque allows anyone to create random domain names with tamper-proof records. It provides mechanisms to distribute and update these records automatically through web sites and over a decentralized peer-to-peer network.
 
-The DNS records containing the IP addresses of the servers used by the domain are signed using the private key. This way the client (using the public key, which is provided with the record). This makes it impossible to create a DNS record for a domain without controlling the key used to create it.
+Unlike the current system dnesque domain names may not be chosen; instead they are generated from cryptographic keys. The resulting domains use the top-level-domain `.nsq` are not memorable or particularly human-friendly. Security and decentralization are seen as more important goals than human-friendliness, particularly given the increased portion of communication which happens virtually and the increasingly widespread use of QR codes to conveniently distribute digital information in "real life".
 
-These domains are obviously not memorizable, but with QR codes becoming more common the number of situations where they would need to be is very few, and search engines can deal with many of those.
+Example domain name: `http://pv3bne7tmebbe5peg3y3zwi2nagmo5eijhzcckudqdmilolx2vcq.nsq/`.
 
-The dnesque client will run in the background. It will get information in two ways: provided by servers the browser connects to (using a browser plugin) and from other clients that are online.
+### Design
 
-### Browser/HTTP System
+The dnesque software has three parts:
 
-*(Requires a browser plugin to be installed. Not required, but recommend for browsing.)*
+1. A client that maintains a database of known dnesque records and exchanges this information with other clients over a distributed network.
+
+2. A dnesque-DNS bridge connected to a client, allowing systems and software to access dnesque records using the conventional DNS protocol.
+
+3. A browser plugin connected to a client, allowing websites the communicate dnesque information directly *(optional but strongly recommended)*.
+
+### Browser/HTTP Interface
 
 The MIME type `text/x-dnesque` will be used for files containing dnesque records. When a browser loads one of these it will load it into the dnesque system (which provides a JSON API to talk to local software). This provides an easy way for users to load updated DNS entires manually.
 
@@ -60,9 +66,20 @@ When a client is asked for a domain that it doesn't know it will query peers for
 
 are scary and not all worked out yet, so they're not here. After a record is a certain age it will look around for updates to it, and updates to records that you know peers have outdated versions of will be pushed to them, but I don't want to get into that here.
 
-License (Public Domain)
------------------------
+License and Credits
+-------------------
 
 This software and related files are released under the [CC0 1.0 Public Domain Dedication](http://creativecommons.org/publicdomain/zero/1.0/).
 
-However it uses libraries that are not public domain. They'll all be permissive MIT-style licenses, but since things aren't stable I'm not bothering to include the details here yet.
+dnesque was created by Jeremy Banks <<jeremy@jeremybanks.ca>>. A full list of contributors [may be found though GitHub](https://github.com/jeremybanks/dnesque/contributors).
+
+dnesque may use the following software/libraries. They are available under  MIT and BSD licenses:
+
+- [virtualenv](http://www.virtualenv.org/) (Python environment manager)
+- [pip](http://www.pip-installer.org/) (Python package manager)
+- [Twisted](http://twistedmatrix.com/) (Python networking framework)
+- [M2Crypto](http://chandlerproject.org/Projects/MeTooCrypto) (Python OpenSSL wrapper)
+- [nodeenv](https://github.com/ekalinin/nodeenv) (node.js environment manager)
+- [npm](http://npmjs.org/) (node.js package manager)
+- [node.js](http://nodejs.org/) (JavaScript networking framework)
+- [CoffeeScript](http://jashkenas.github.com/coffee-script/) (JavaScript-targeting programming language)
