@@ -1,7 +1,15 @@
 #!../bin/python
 import hashlib
+import math
 
 class BloomFilter(object):
+    @classmethod
+    def targeting_false_positive_rate(cls, rate, n):
+        # creates a bloom filter of the required size as to have an expected
+        # false positive rate of `rate` when holding `n` items.
+        
+        return cls(8 * math.log(rate, 1 - 0.5 ** n) / 2.0)
+    
     def __init__(self, size_or_state, values=None):
         self.state = binary(size_or_state)
         self.size = len(self.state)
@@ -11,17 +19,23 @@ class BloomFilter(object):
                 self.add(value)
     
     def add(self, value):
+        # adds as value to the filter
+        
         self.state |= big_hash(self.size, value)
         
         self._bit_set_rate = None
         self._false_positive_rate = None
     
     def __contains__(self, value):
+        # determines if a value is probably in the filter
+        
         return bool(self.state & big_hash(self.size, value))
     
     _false_positive_rate = None
     @property
     def false_positive_rate(self):
+        # returns the probability that a missing value is reported as present
+        
         if self._false_positive_rate is None:
             self._false_positive_rate = bit_set_rate ** ((self.size / 2.0) * 8)
         
@@ -38,6 +52,8 @@ class BloomFilter(object):
         return self._bit_set_rate
 
 def big_hash(min_bytes, data, hashtype=hashlib.sha256):
+    # repeatedly updates a hash with its own digest to pad the value
+    
     state = hashtype()
     result = binary()
 
@@ -51,6 +67,8 @@ def big_hash(min_bytes, data, hashtype=hashlib.sha256):
     return result
 
 class binary(bytearray):
+    # extends bytearray to support some binary operations
+    
     def __or__(self, other):
         return type(self)((a | b) for (a, b) in zip(self, other))
     
@@ -86,3 +104,11 @@ class binary(bytearray):
                 count += (byte >> offset) & 1
         
         return count
+
+def main():
+    pass
+
+if __name__ == "__main__":
+    import sys
+    
+    sys.exit(main(*sys.argv[1:]))
