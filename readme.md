@@ -62,29 +62,35 @@ Without the browser plugin, dnesque clients may look for updates at the `x-dnesq
 
 ### Data Format - `text/x-dnesque`
 
-dnesque data files can contain dnesque records and lists of peer clients. If it has a single item, that item may be the root JSON object. Otherwise the root object should be an array.
+The `text/x-dnesque` format is used both in the files read by the browser plugin and by the JSON-RPC communication of the clients. It is encoded in JSON. The root object can be a single object or an array of multiple objects.
+
+The data can include domain records
 
     {
         "type": "record",
     
-        "id": "[the second level of the domain, based on hashed public key]",
+        "id": "[the second level of the domain,
+                based on hashed public key]",
         "public_key": "[radix64-encoded public key]",
     
         "record": "[json encoded record (timestamped)]",
         "signature": "[base64-encoded signature]"
     }
-    
+
+and peers.
+
     {
         "type": "peer",
-    
-        "host": "[ip address a domain name (DNS or dnesque)]:[port]",
-    
-        "known-ids": [
-            [optional list of string ids of domains this peer knows;
-             this will be used to prioritize this peer if information
-             about those domains is needed]
-        ]
+        
+        "host": [[ip address or domain name (DNS or dnesque)], [port]],
+        
+        "known-ids": [optional iterated sha256 bloom filter or list
+                      of ids of known domains],
+        "known-records: [optional iterated sha256 bloom filter
+                         of known records],
     }
+
+Peers may chose to identify themselves using a dnesque domain instead of just an IP address. In this case their dnesque record should usually be included with their peer information.
 
 ### Peer-to-Peer System
 

@@ -8,6 +8,36 @@ import twisted.internet.reactor
 
 import properjson as json
 
+class DebugPageResource(twisted.web.resource.Resource):
+    def render_GET(self, request):
+        request.setHeader("Content-Type", "text/html")
+        
+        return """<!doctype html>
+<html>
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.2/jquery.min.js"></script>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+        </style>
+        <script>$(function() {
+            window.jsonrpc = function(method, params) {
+                jQuery.post("/jsonrpc", JSON.stringify({
+                    method: JSON.stringify(method),
+                    params: JSON.stringify(params || []),
+                }, function(data) {
+                    console.log(JSON.parse(data))
+                }, "json"))
+            }
+            
+            console.log("jsonrpc(method, params) is defined for you.")
+        })</script>
+    </head>
+    <body></body>
+</html>
+"""
+
 class JSONRPCResource(twisted.web.resource.Resource):
     # Responds to POSTs according to the JSON-RPC 1.0 specification.
     
@@ -50,19 +80,22 @@ class JSONRPCResource(twisted.web.resource.Resource):
             return "Hello!"
         else:
             raise Exception("No such method!")
-    
-    def serve(self, port):
-        # Starts listening on the specified port for requests to /jsonrpc.
+
+class JSONRPCSite(twisted.web.resource.Resource):
+    def __init__(self, port, methods=None):
+        twisted.web.resource.Resource.__init__(self, *a, **kw)
         
-        root = twisted.web.resource.Resource()
-        root.putChild("jsonrpc", self)
+        self.putChild("jsonrpc", JSONRPCResource(self.methods))
+        self.putChild("debug.html", DebugPageResource())
         
-        site = twisted.web.server.Site(root)
+        self.methods = methods if methods is not None else dict()
         twisted.internet.reactor.listenTCP(port, site)
-        twisted.internet.reactor.run()
+
+
 
 def main():
-    JSONRPCResource().serve(4862)
+    site = JSONRPCSite(4862)
+    twisted.internet.reactor.run()
 
 if __name__ == "__main__":
     import sys
