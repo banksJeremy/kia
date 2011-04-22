@@ -3,6 +3,10 @@ import hashlib
 import math
 
 class BloomFilter(object):
+    @classmethod
+    def with_capacity(cls,  n, false_positive_rate):
+        raise NotImplementedError()
+    
     def __init__(self, size_or_state, values=None):
         self.state = binary(size_or_state)
         self.size = len(self.state)
@@ -30,7 +34,7 @@ class BloomFilter(object):
         # returns the probability that a missing value is reported as present
         
         if self._false_positive_rate is None:
-            self._false_positive_rate = bit_set_rate ** ((self.size / 2.0) * 8)
+            self._false_positive_rate = self.bit_set_rate ** ((self.size / 2.0) * 8)
         
         return self._false_positive_rate
     
@@ -49,7 +53,9 @@ def big_hash(min_bytes, data, hashtype=hashlib.sha256):
     
     state = hashtype()
     result = binary()
-
+    
+    state.update(data)
+    
     while len(result) < min_bytes:
         current_digest = state.digest()
 
@@ -66,22 +72,27 @@ class binary(bytearray):
         return type(self)((a | b) for (a, b) in zip(self, other))
     
     def __ior__(self, other):
-        for i, value in self:
-            self[i] = value | other[i]
+        for i, (x, y) in enumerate(zip(self, other)):
+            self[i] = x | y
+        
+        return self
     
     def __and__(self, other):
         return type(self)((a & b) for (a, b) in zip(self, other))
     
     def __iand__(self, other):
-        for i, value in self:
-            self[i] = value & other[i]
+        for i, (x, y) in enumerate(zip(self, other)):
+            self[i] = x & y        
+        return self
     
     def __xor__(self, other):
         return type(self)((a ^ b) for (a, b) in zip(self, other))
 
     def __ixor__(self, other):
-        for i, value in self:
-            self[i] = value ^ other[i]
+        for i, (x, y) in enumerate(zip(self, other)):
+            self[i] = x ^ y
+        
+        return self
     
     def __invert__(self):
         return type(self)(~value for value in self)
@@ -93,13 +104,24 @@ class binary(bytearray):
         count = 0
         
         for byte in self:
-            for offset in (0, 8):
+            for offset in range(0, 8):
                 count += (byte >> offset) & 1
         
         return count
 
 def main():
-    pass
+    size = 1000
+    n = 1
+    
+    b = BloomFilter(size)
+    
+    for x in range(n):
+        b.add(str(x))
+    
+    print "size", size
+    print "n", n
+    print "set rate", b.bit_set_rate
+    print "false pos rate", b.false_positive_rate
 
 if __name__ == "__main__":
     import sys
