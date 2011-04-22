@@ -120,29 +120,39 @@ class binary(bytearray):
         return count
 
 def main():
-    def false_positive_rate(
-        density = 1e-3,
-        n = 1e3,
-        size = 1e4
-      ): return (1 - (1 - density) ** n) ** (size * density)
+    # TODO: Compare efficiency of bloom filter to simple set of hashes
+    # Okay, I as I should have expected bloom filters are practically
+    # strictly better.
     
-    print false_positive_rate()
+    def hashset_false_positive_rate(n, size):
+        each_hash_size = size // n
+        
+        return 1 - (1 - 1 / (2 ** each_hash_size)) ** n
     
-    return 
+    def bloom_false_positive_rate(n, size):
+      
+      optimal_bits = (size / n) * math.log(2)
+      optimal_density = optimal_bits / size
+      
+      return (1 - (1 - optimal_density) ** n) ** (size * optimal_density)
     
-    size = 1000
-    n = 1
+    for np in range(0, 5):
+        n = 10 ** np
+        
+        for zp in range(np, 5):
+            size = 10 ** zp
+            
+            
+            if hashset_false_positive_rate(n, size) > bloom_false_positive_rate(n, size):
+                continue
+            
+            print "n", n
+            print "size", size
+            print "hash falpos", hashset_false_positive_rate(n, size)
+            print "bloom falpos", bloom_false_positive_rate(n, size)
+            print
+            
     
-    b = BloomFilter(size)
-    
-    for x in range(n):
-        b.add(str(x))
-    
-    print "size", size
-    print "n", n
-    print "set rate", b.bit_set_rate
-    print "false pos rate", b.false_positive_rate
-
 if __name__ == "__main__":
     import sys
     
