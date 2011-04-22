@@ -12,8 +12,20 @@ parse_constant = {
 
 indent = None
 
+separators = (",",":")
+
+def default(o):
+    if hasattr(o, "to_jsonable"):
+        return o.to_jsonable()
+    else:
+        return o
+
 load = functools.partial(json.load, parse_constant=parse_constant)
 loads = functools.partial(json.loads, parse_constant=parse_constant)
 
-dump = functools.partial(json.dump, allow_nan=False, indent=indent, sort_keys=True)
-dumps = functools.partial(json.dumps, allow_nan=False, indent=indent, sort_keys=True)
+dump = functools.partial(json.dump, allow_nan=False, indent=indent,
+                         sort_keys=True, default=default,
+                         separators=separators)
+dumps = functools.partial(json.dumps, allow_nan=False, indent=indent,
+                          sort_keys=True, default=default,
+                          separators=separators)
