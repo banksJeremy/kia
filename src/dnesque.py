@@ -4,9 +4,14 @@ import time
 
 import crypto
 import properjson as json
+import bloom
 
 class Record(object):
+    """A DNS record, including a signature and key."""
+    
     def __init__(self, key, record_data=None, signature=None):
+        """Initializes a record, new or from existing data."""
+        
         self.key = key
         
         if isinstance(record_data, str):
@@ -33,6 +38,8 @@ class Record(object):
     
     @classmethod
     def from_json(Record, encoded_data):
+        """Creates a record from a JSON encoding.."""
+        
         data = json.loads(encoded_data)
         
         if data["type"] != "record":
@@ -42,13 +49,15 @@ class Record(object):
         record = data["record"]
         signature = base64.b64decode(data["signature"]) if data["signature"] else None
         
-        if key.domain_id != data["id"]:
-            raise ValueError("public key and ID do not match")
+        if "id" in data and key.domain_id != data["id"]:
+            raise ValueError("specified ID does not match public key")
         
         return Record(key, record, signature)
         
     
     def to_jsonable(self):
+        """Serializes as a simple object that can be JSON-encoded."""
+        
         return {
             "type": "record",
         
@@ -58,6 +67,53 @@ class Record(object):
             "record": self.encoded_record_data,
             "signature": base64.b64encode(self.signature)
         }
+
+class Peer(object):
+    """Information about a peer."""
+    
+    def __init__(self, address, known_ids=None, known_records=None):
+        self.address = list(address)
+        self.known_ids = known_ids or bloom.BloomFilter(128)
+        self.known_records = known_records or bloom.BloomFilter(128)
+    
+    @classmethod
+    def from_json(Peer, encoded_data):
+        data = json.loads(encoded_data)
+        
+        if data["type"] != "peer":
+            raise ValueError("data is not a peer")
+        
+        address = data["address"]
+        
+        if "known_ids" in data and data["known_ids"]:
+            if instanceof(data["known_ids"], str):
+                known_ids = bloom.BloomFilter(base64.b64decode, data["known_ids"])
+            else:
+                known_ids = set(data["known_ids"])
+        else:
+            known_ids = None
+        
+        if "known_records" in data and data["known_records"]:
+            known_records = bloom.BloomFilter(base64.b64decode, data["known_records"])
+        
+        return Peer(address, known_ids, known_records)
+    
+    def to_jsonable(self):
+        simple = {
+            "type": "peer",
+            "address": list(self.address),
+        }
+        
+        if self.known_ids:
+            if isinstance(self.known_ids, bloom.BloomFilter):
+                simple["known_ids"] = base64.b64encode(self.known_ids.state)
+            else:
+                simple["known_ids"] = list(self.known_ids)
+        
+        if self.known_records:
+            simple["known_records"] = base64.b64encode(self.known_ids.state)
+        
+        return simple
 
 def main():
     import crypto

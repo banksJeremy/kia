@@ -3,13 +3,6 @@ import hashlib
 import math
 
 class BloomFilter(object):
-    @classmethod
-    def targeting_false_positive_rate(cls, rate, n):
-        # creates a bloom filter of the required size as to have an expected
-        # false positive rate of `rate` when holding `n` items.
-        
-        return cls(8 * math.log(rate, 1 - 0.5 ** n) / 2.0)
-    
     def __init__(self, size_or_state, values=None):
         self.state = binary(size_or_state)
         self.size = len(self.state)
