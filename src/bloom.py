@@ -1,4 +1,6 @@
 #!../bin/python
+from __future__ import division
+
 import hashlib
 import math
 
@@ -47,6 +49,14 @@ class BloomFilter(object):
             self._bit_set_rate = self.state.count_bits() / (8.0 * self.size)
         
         return self._bit_set_rate
+
+def big_sparse_hash(min_bytes, sparseness, data, hashtype=hashlib.sha256):
+    result = big_hash(min_bytes, data, hashtype)
+    
+    for _ in range(1, sparseness):
+        result |= big_hash(min_bytes, data, hashtype)
+    
+    return result
 
 def big_hash(min_bytes, data, hashtype=hashlib.sha256):
     # repeatedly updates a hash with its own digest to pad the value
@@ -110,6 +120,16 @@ class binary(bytearray):
         return count
 
 def main():
+    def false_positive_rate(
+        density = 1e-3,
+        n = 1e3,
+        size = 1e4
+      ): return (1 - (1 - density) ** n) ** (size * density)
+    
+    print false_positive_rate()
+    
+    return 
+    
     size = 1000
     n = 1
     
