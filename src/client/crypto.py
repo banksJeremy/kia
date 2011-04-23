@@ -116,7 +116,8 @@ def main():
     
     private = crypto.Key()
     
-    print("Loading private key, then public key round-tripping JSON from that...")
+    print("Loading private key, then public "
+          "key round-tripping JSON from that...")
     
     public = Key.from_json_equivalent(
         crypto.Key("private", private.data).pub.to_json_equivalent())
