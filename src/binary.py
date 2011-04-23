@@ -1,10 +1,10 @@
 #!../bin/python
-from __future__ import division
+from __future__ import division, print_function, unicode_literals
 
 import math
 
 class ByteArray(bytearray):
-    # Extends bytearray to be more binary-useful.
+    """An more binary-useful extension of the bytearray type."""
     
     @property
     def bits(self):
@@ -13,13 +13,12 @@ class ByteArray(bytearray):
         return self._bits
     _bits = None
     
-    # ByteArrays can be cast to ints and created from them using the from_int
-    # class method. This is not the same as specifying an integer to the
+    # ByteArrays can be converted to_int and from_int. A little-endian byte
+    # order is used. This is not the same as specifying an integer to the
     # constructor, which generates an empty array of that many bytes.
-    # 
-    # The integer representation is little-endian.
     
     def to_int(self):
+        """Decodes an integer from a little-endian ByteArray."""
         result = 0
         
         for byte in reversed(self):
@@ -30,8 +29,13 @@ class ByteArray(bytearray):
         
     @classmethod
     def from_int(cls, value):
+        """Encodes an integer as a little-endian ByteArray."""
+        
         value = int(value)
-        result = cls(int(math.ceil(value.bit_length() / 8)))
+        
+        byte_length = int(math.ceil(value.bit_length() / 8))
+        
+        result = cls()
         
         i = len(result) - 1
         
@@ -91,39 +95,35 @@ class ByteArray(bytearray):
             return result
 
 class BinaryInterface(object):
-    """An bit-level interface for ByteArrays."""
+    """An bit-level sequence interface for ByteArrays."""
     
-    def __init__(self, bytes):
-        self.bytes = bytes
+    def __init__(self, byte_array):
+        self.byte_array = byte_array
     
     def __getitem__(self, index):
-        byte_index = len(self.bytes) // 8
-        byte = self.bytes[byte_index]
-        return bool(byte & (1 << (index % 8)))
+        byte_index = len(self.byte_array) // 8
+        byte = self.byte_array[byte_index]
+        
+        return byte & (1 << (index % 8))
     
     def __setitem__(self, index, value):
-        byte_index = len(self.bytes) // 8
-        byte = self.bytes[byte_index]
+        byte_index = len(self.byte_array) // 8
+        byte = self.byte_array[byte_index]
         
         if value:
             byte = byte | (1 << (index % 8)) # set bit
         else:
             byte = byte & ~ (1 << (index % 8)) # unset bit
         
-        self.bytes[byte_index] = byte
+        self.byte_array[byte_index] = byte
     
     def __len__(self):
-        return len(self.bytes) * 8
+        return len(self.byte_array) * 8
     
     def __nonzero__(self):
-        return any(self.bytes)
+        return any(self.byte_array)
     
-    def count_set(self):
-        # returns an integer of the number of bits set
-        result = 0
-        
+    def __iter__(self):
         for byte in self:
             for offset in range(0, 8):
-                result += (byte >> offset) & 1
-        
-        return count  
+                yield (byte >> offset) & 1

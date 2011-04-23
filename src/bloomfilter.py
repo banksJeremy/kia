@@ -54,7 +54,7 @@ class BloomFilter(object):
         # should be or not.
         
         if self._positive_rate is None:
-            self._positive_rate = (self.state.bits.count_set() / (len(self.state.bits))) ** hash_count
+            self._positive_rate = (sum(self.state.bits) / (len(self.state.bits))) ** hash_count
         
         return self._positive_rate
     _positive_rate = None

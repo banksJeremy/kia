@@ -1,4 +1,5 @@
-#!../bin/python
+#!../../bin/python
+from __future__ import division, print_function, unicode_literals
 # simulates the behaviour of a network of peers, in order to understand how
 # different rules affect the shape of the network.
 
