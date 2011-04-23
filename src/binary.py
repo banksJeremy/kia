@@ -6,16 +6,14 @@ import math
 class ByteArray(bytearray):
     """An more binary-useful extension of the bytearray type."""
     
+    byte_order = "<"
+    
     @property
     def bits(self):
         if self._bits is None:
             self._bits = BinaryInterface(self)
         return self._bits
     _bits = None
-    
-    # ByteArrays can be converted to_int and from_int. A little-endian byte
-    # order is used. This is not the same as specifying an integer to the
-    # constructor, which generates an empty array of that many bytes.
     
     def to_int(self):
         """Decodes an integer from a little-endian ByteArray."""
@@ -35,11 +33,9 @@ class ByteArray(bytearray):
         
         byte_length = int(math.ceil(value.bit_length() / 8))
         
-        result = cls()
+        result = cls(byte_length)
         
-        i = len(result) - 1
-        
-        while value > 0:
+        for i in range(byte_length):
             result[i] = value & 255
             value //= 256
             i -= 1
@@ -97,6 +93,8 @@ class ByteArray(bytearray):
 class BinaryInterface(object):
     """An bit-level sequence interface for ByteArrays."""
     
+    bit_order = "<"
+    
     def __init__(self, byte_array):
         self.byte_array = byte_array
     
@@ -127,3 +125,20 @@ class BinaryInterface(object):
         for byte in self:
             for offset in range(0, 8):
                 yield (byte >> offset) & 1
+
+def main():
+    import binary
+    
+    print("Running sanity check on ByteArray.from_int().to_int()...")
+    
+    for power in range(0, 128, 4):
+        n = 2 ** power
+        b = binary.ByteArray.from_int(n)
+        np = b.to_int()
+        assert n == np, ("Integer<->ByteArray round trip converted "
+                         "{!r} to {!r}!\nbytes: {!r}".format(n, np, list(b)))
+
+if __name__ == "__main__":
+    import sys
+    
+    sys.exit(main(*sys.argv[1:]))
