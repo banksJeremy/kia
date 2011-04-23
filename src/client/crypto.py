@@ -18,8 +18,8 @@ class Key(object):
     # and verification as recommended in Colin Percival's "Everything you
     # need to know about cryptography in 1 hour" (http://goo.gl/QD92C).
         
-    def __init__(self, type_="private", key_data=None):
-        if key_data is None:
+    def __init__(self, type_="private", data=None):
+        if data is None:
             self._key = M2Crypto.RSA.gen_key(2048, 65537, noop)
             self.type = "private"
         else:
@@ -31,9 +31,9 @@ class Key(object):
                 else:
                     data_type = "PUBLIC KEY"
                 
-                self._key_data = key_data
+                self._data = data
                 
-                armored = asciiarmor.AsciiArmored(data=key_data, type_=data_type)
+                armored = asciiarmor.AsciiArmored(data=data, type_=data_type)
                 
                 f.write(armored.dumps())
                 
@@ -45,8 +45,8 @@ class Key(object):
                     self._key = M2Crypto.RSA.load_pub_key(f.name)
     
     @property
-    def key_data(self):
-        if self._key_data is None:
+    def data(self):
+        if self._data is None:
             with tempfile.NamedTemporaryFile("w+t") as f:
                 self._key.save_key(f.name, cipher=None, callback=noop)
                 
@@ -54,14 +54,14 @@ class Key(object):
                 
                 pem = f.read()
                 
-                self._key_data = asciiarmor.loads(pem).data
-        return self._key_data
-    _key_data = None
+                self._data = asciiarmor.loads(pem).data
+        return self._data
+    _data = None
     
-    def __get_pub_key_data(self):
+    def __get_pub_data(self):
         """Loads the public key binary.ByteArray() from the underlying key.
         
-        Not meant to be used directly: use .pub.key_data instead."""
+        Not meant to be used directly: use .pub.data instead."""
         
         with tempfile.NamedTemporaryFile("w+t") as f:
             self._key.save_pub_key(f.name)
@@ -78,7 +78,7 @@ class Key(object):
             return self
         else:
             if self._pub is None:
-                self._pub = type(self)("public", self.__get_pub_key_data())
+                self._pub = type(self)("public", self.__get_pub_data())
             
             return self._pub
     _pub = None
@@ -88,7 +88,7 @@ class Key(object):
     
     @property
     def domain_id(self):
-        return base64.b32encode(self.digest(self.pub.key_data)).lower().strip("=")
+        return base64.b32encode(self.digest(self.pub.data)).lower().strip("=")
     
     def verify(self, message, signature):
         return bool(self._key.verify_rsassa_pss(self.digest(message), signature, "sha256")) 
@@ -98,6 +98,16 @@ class Key(object):
             return self._key.sign_rsassa_pss(self.digest(message), "sha256")
         else:
             raise Exception("Private key required to sign messages.")
+    
+    @classmethod
+    def from_json_equivalent(cls, o):
+        return cls(type_=o["which"], data=base64.b64decode(o["data"]))
+    
+    def to_json_equivalent(self):
+        return {
+            "which": self.type,
+            "data": base64.b64encode(self.data)
+        }
 
 def main():
     import crypto
@@ -106,9 +116,10 @@ def main():
     
     private = crypto.Key()
     
-    print("Loading private key, then public key from that...")
+    print("Loading private key, then public key round-tripping JSON from that...")
     
-    public = crypto.Key("private", private.key_data).pub
+    public = Key.from_json_equivalent(
+        crypto.Key("private", private.data).pub.to_json_equivalent())
     
     print("Key's domain id:", public.domain_id)
     
