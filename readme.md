@@ -109,6 +109,12 @@ When a client is looking for information about a domain (either because a user h
 
 Don't exist yet. Updated records are pushed between clients (as well as non-updated records being pushed around randomly or something). If clients set a limit on the size of their local databases they can forget old records that they know are available in a large enough portion of their peers.
 
+### Milestones
+
+- `v0.5` will have everything working. Nothing needs to be optimal, just functional.
+- As aspects of the system are improved, versions will progress as `v0.75`, `v0.875`, `v0.9375`, `v0.96875`...
+- `v1.0` will be once I'm satisfied that everything is done in a reasonably sensible way.
+
 License and Credits
 -------------------
 

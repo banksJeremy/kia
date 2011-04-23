@@ -126,6 +126,20 @@ def hash_of_bytes(data, bytes=32, hash_type=hashlib.sha256):
     
     return result
 
+def byte_generator(data, hash_type=hashlib.sha256):
+    # Generates an infinite sequence of bits from a hash by repeatedly
+    # updating the hash with the current digest.
+    
+    hashing = hash_type(data)
+    current_digest = hashing.digest()
+    
+    while True:
+        for byte in current_digest:
+            yield byte
+        
+        hashing.update(current_digest)
+        current_digest = hashing.digest()
+
 def main():
     for n in range(58):
         print(n - hash_of_bits("o!o", n).to_int().bit_length())
