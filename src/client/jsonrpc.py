@@ -84,11 +84,14 @@ class JSONRPCResource(twisted.web.resource.Resource):
             raise Exception("No such method!")
 
 class JSONRPCSite(twisted.web.resource.Resource):
-    def __init__(self, port, methods=None):
+    def __init__(self, port, methods=None, enable_jsonp=False, enable_debug=True):
         twisted.web.resource.Resource.__init__(self, *a, **kw)
         
-        self.putChild("jsonrpc", JSONRPCResource(self.methods))
-        self.putChild("debug.html", DebugPageResource())
+        self.putChild("jsonrpc", JSONRPCResource(self.methods,
+                                                 enable_jsonp=enable_jsonp))
+        
+        if debug:
+            self.putChild("debug.html", DebugPageResource())
         
         self.methods = methods if methods is not None else dict()
         twisted.internet.reactor.listenTCP(port, site)
