@@ -84,6 +84,12 @@ class AsciiArmored(object):
         lines = []
         
         lines.append("-----BEGIN " + (self.type) + "-----")
+        
+        if self.headers:
+            for pair in self.headers:
+                lines.append(": ".join(pair))
+            lines.append("")
+        
         lines.extend(textwrap.wrap(base64.b64encode(self.data), 64))
         lines.append("-----END " + (self.type) + "-----")
         lines.append("")
@@ -91,6 +97,8 @@ class AsciiArmored(object):
         return "\n".join(lines)
 
 loads = AsciiArmored.loads
+
+dumps = lambda *a, **kw: AsciiArmored(*a, **kw).dumps()
 
 def main(action="--encode"):
     import sys
