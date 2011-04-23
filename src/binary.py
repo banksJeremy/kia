@@ -23,7 +23,7 @@ class ByteArray(bytearray):
         result = 0
         
         for byte in reversed(self):
-            result <<= 8
+            result *= 256
             result += byte
         
         return result
@@ -37,8 +37,8 @@ class ByteArray(bytearray):
         
         while value > 0:
             result[i] = value & 255
+            value //= 256
             i -= 1
-            value >>= 8
         
         return result
     

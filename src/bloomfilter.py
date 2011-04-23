@@ -41,6 +41,13 @@ class BloomFilter(object):
     def __repr__(self):
         return "<{} size={!r} hash_count={!r}>".format(type(self).__name__, len(self.state), self.hash_count)
     
+    def to_jsonable(self):
+        pass
+    
+    @classmethod
+    def from_jsonable(self, value):
+        pass
+    
     @property
     def positive_rate(self):
         # the ratio of results that are going to be positive whether they
@@ -96,9 +103,7 @@ def hash_of_bits(data, bits=256, hash_type=hashlib.sha256):
     
     if bits % 8:
         doomed_bits = 8 - (bits % 8)
-        
-        if doomed_bits:
-            result[0] &= (255 >> doomed_bits)
+        result[0] &= (255 >> doomed_bits)
     
     return result
 
@@ -122,8 +127,8 @@ def hash_of_bytes(data, bytes=32, hash_type=hashlib.sha256):
     return result
 
 def main():
-    for n in range(100):
-        print(hash_of_bits("fo!o", n).to_int() / (2 ** n))
+    for n in range(58):
+        print(n - hash_of_bits("o!o", n).to_int().bit_length())
     
     return
     n = 1

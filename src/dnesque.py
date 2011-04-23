@@ -4,7 +4,24 @@ import time
 
 import crypto
 import properjson as json
-import bloom
+import bloomfilter
+
+def json_loads(*a, **kw):
+    """Loads JSON data, deserializing supported types."""
+    
+    known_types = {
+        "record": Record,
+        "peer": Peer,
+        "bloom_filter": bloomfilter.BloomFilter
+    }
+    
+    def default(o):
+        if "type" in o and o["type"] in known_types:
+            return known_types[o].from_jsonable(o)
+        else:
+            return o
+    
+    return json.loads(*a, default=default, **kw)
 
 class Record(object):
     """A DNS record, including a signature and key."""

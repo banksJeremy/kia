@@ -64,7 +64,7 @@ Without the browser plugin, dnesque clients may look for updates at the `x-dnesq
 
 The `text/x-dnesque` format is used both in the files read by the browser plugin and by the JSON-RPC communication of the clients. It is encoded in JSON. The root object can be a single object or an array of multiple objects.
 
-The data can include domain records
+The format supports three types of objects:
 
     {
         "type": "record",
@@ -77,17 +77,22 @@ The data can include domain records
         "signature": "[base64-encoded signature]"
     }
 
-and peers.
-
     {
         "type": "peer",
         
         "host": [[ip address or domain name (DNS or dnesque)], [port]],
         
-        "known-ids": [optional iterated sha256 bloom filter or list
-                      of ids of known domains],
-        "known-records: [optional iterated sha256 bloom filter
-                         of known records],
+        "known-ids": [optional bloom filter or list of ids of known domains],
+        "known-records: [optional bloom filter of known records],
+    }
+
+    {
+        "type": "bloom_filter",
+        
+        "data": "[base64 encoded filter state]",
+        "hash_count": "[number of hash functions used in filter]",
+        
+        "salt": "[optional base64-encoded salt]",
     }
 
 Peers may chose to identify themselves using a dnesque domain instead of just an IP address. In this case their dnesque record should usually be included with their peer information.
