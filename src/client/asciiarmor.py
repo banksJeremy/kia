@@ -19,7 +19,7 @@ class AsciiArmored(object):
     """
     
     def __init__(self, data=None, type_=None, headers=None):
-        self.data = data or binary.ByteArray()
+        self.data = binary.ByteArray(data) if data else binary.ByteArray()
         self.type = type_ or "PGP MESSAGE"
         self.headers = headers or []
     
@@ -86,8 +86,21 @@ class AsciiArmored(object):
         lines.append("-----BEGIN " + (self.type) + "-----")
         lines.extend(textwrap.wrap(base64.b64encode(self.data), 64))
         lines.append("-----END " + (self.type) + "-----")
-        lines.extend([])
+        lines.append("")
         
         return "\n".join(lines)
 
 loads = AsciiArmored.loads
+
+def main(action="--encode"):
+    import sys
+    
+    if action == "--decode":
+        sys.stdout.write(AsciiArmored.loads(sys.stdin.read()).data)
+    else:
+        sys.stdout.write(AsciiArmored(sys.stdin.read()).dumps())
+
+if __name__ == "__main__":
+    import sys
+    
+    sys.exit(main(*sys.argv[1:]))
