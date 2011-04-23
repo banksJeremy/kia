@@ -96,19 +96,22 @@ class BinaryInterface(object):
         self.byte_array = byte_array
     
     def __getitem__(self, index):
-        byte_index = len(self.byte_array) // 8
+        byte_index = index // 8
+        bit_index = index % 8
+        
         byte = self.byte_array[byte_index]
         
-        return byte & (1 << (index % 8))
+        return (byte >> bit_index) & 1
     
     def __setitem__(self, index, value):
-        byte_index = len(self.byte_array) // 8
+        byte_index = index // 8
+        bit_index = index % 8
         byte = self.byte_array[byte_index]
         
         if value:
-            byte = byte | (1 << (index % 8)) # set bit
+            byte |= (1 << bit_index) # set bit
         else:
-            byte = byte & ~ (1 << (index % 8)) # unset bit
+            byte &= ~ (1 << bit_index) # unset bit
         
         self.byte_array[byte_index] = byte
     
@@ -117,8 +120,8 @@ class BinaryInterface(object):
     
     def __iter__(self):
         for byte in self.byte_array:
-            for offset in range(0, 8):
-                yield (byte >> offset) & 1
+            for down_shift in range(0, 8):
+                yield (byte >> down_shift) & 1
 
 def main():
     import binary

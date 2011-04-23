@@ -156,10 +156,23 @@ class BinaryInterfaceTests(unittest.TestCase):
     """Basic, non-comprehensive tests for binary.BinaryInterface."""
     
     def test_get_index(self):
-        raise NotImplementedError("Test not implemented.")
+        bits = binary.ByteArray([1, 8]).bits
+        
+        self.assertEquals(1, bits[0])
+        self.assertEquals(0, bits[1])
+        self.assertEquals(0, bits[7])
+        self.assertEquals(1, bits[8 + 3])
+        self.assertEquals(0, bits[8 + 4])
     
     def test_set_index(self):
-        raise NotImplementedError("Test not implemented.")
+        bytes_ = binary.ByteArray([1, 2, 3])
+        
+        bytes_.bits[0] = 0
+        bytes_.bits[8] = 1
+        bytes_.bits[9] = 0
+        bytes_.bits[10] = 1
+        
+        self.assertEqual(bytes_, binary.ByteArray([0, 5, 3]))
     
     def test_get_slice(self):
         self.skipTest("Feature not implemented.")
