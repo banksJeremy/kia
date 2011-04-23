@@ -9,13 +9,13 @@ the standard and add support for (de)serializing arbitrary types using the
 You may pass a map of `{ name: class }` as `types`, where each class has the
 instance method `to_json_equivalent` and the class method
 `from_json_equivalent`, and they will be serialized storing the type name as
-the property TYPE_PROPERTY ("type").
+the property TYPE_PROPERTY ("__type").
 """
 
 import json
 import functools
 
-TYPE_PROPERTY = "type"
+TYPE_PROPERTY = "__type"
 
 parse_constant = {
     "true": True,

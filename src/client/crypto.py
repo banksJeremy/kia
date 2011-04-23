@@ -101,11 +101,11 @@ class Key(object):
     
     @classmethod
     def from_json_equivalent(cls, o):
-        return cls(type_=o["which"], data=base64.b64decode(o["data"]))
+        return cls(type_=o["type"], data=base64.b64decode(o["data"]))
     
     def to_json_equivalent(self):
         return {
-            "which": self.type,
+            "type": self.type,
             "data": base64.b64encode(self.data)
         }
 

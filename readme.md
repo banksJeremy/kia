@@ -67,7 +67,7 @@ The `text/x-dnesque` format is used both in the files read by the browser plugin
 The format supports three types of objects:
 
     {
-        "type": "record",
+        "__type": "record",
     
         "id": "[the second level of the domain,
                 based on hashed public key]",
@@ -78,7 +78,7 @@ The format supports three types of objects:
     }
 
     {
-        "type": "peer",
+        "__type": "peer",
         
         "host": [[ip address or domain name (DNS or dnesque)], [port]],
         
@@ -87,7 +87,7 @@ The format supports three types of objects:
     }
 
     {
-        "type": "bloom_filter",
+        "__type": "bloom_filter",
         
         "data": "[base64 encoded filter state]",
         "hash_count": "[number of hash functions used in filter]",
