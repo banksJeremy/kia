@@ -1,47 +1,10 @@
 #!../bin/python
-from __future__ import division
+from __future__ import division, print_function, unicode_literals
 
 import hashlib
 import math
 
 import binary
-
-"""
-false positive rate of Bloom Filters:
-
-bits = size * 8
-
-P(bit set by a hash)
-                     = 1 / bits
-
-P(bit not set by a hash)
-                     = 1 - P(bit set by a hash)
-                     = 1 - 1 / bits
-
-P(bit not set by any of hash_count hashes)
-                     = P(bit not set by a hash) ** hash_count
-                     = (1 - 1 / bits) ** hash_count
-
-P(bit not set by any of hash_count * capacity hashes)
-                     = P(bit not set by any of hash_count hashes) ** capacity
-                     = (1 - 1 / bits) ** (hash_count * capacity)
-
-P(bit set by one of hash_count * capacity hashes)
-                     = 1 - P(bit not set by any of hash_count * capacity hashes)
-                     = 1 - (1 - 1 / bits) ** (hash_count * capacity)
-
-P(hash_count bits set by any of hash_count * capacity hashes)
-                     = P(bit set by one of hash_count * capacity hashes) ** capacity
-                     = (1 - (1 - 1 / bits) ** (hash_count * capacity)) ** hash_count
-
-model_positive_rate  
-                     = P(hash_count bits set by any of hash_count * capacity hashes)
-                     = (1 - (1 - 1 / bits) ** (hash_count * capacity)) ** hash_count
-
-measured_positive_rate
-                     = (bits_set / bits) ** hash_count
-
-"""
 
 class BloomFilter(object):
     @classmethod
@@ -54,15 +17,15 @@ class BloomFilter(object):
         else:
             if capacity is None:
                 raise ValueException("capacity or values must be specified ")
-        
+            
         if positive_rate is None:
             raise ValueException("positive_rate must be specified")
         
         # coppied blindly from Wikipedia
-        size = math.ceil(((capacity * math.log(positive_rate)) / (math.log(2) ** 2)) / 8)
-        hash_count = math.ceil(((size * 8) / capacity) * math.log(2))
+        bits = int(math.ceil(-((capacity * math.log(positive_rate)) / (math.log(2) ** 2))))
+        hash_count = int(math.ceil(bits / capacity * math.log(2)))
         
-        self = cls(size, hash_count)
+        self = cls(bits * 8, hash_count)
         
         if values is not None:
             for value in values:
@@ -70,10 +33,13 @@ class BloomFilter(object):
         
         return self
     
-    def __init__(self, data_or_size, hash_count, salt=""):
+    def __init__(self, data_or_size, hash_count, salt=b""):
         self.state = binary.ByteArray(data_or_size)
         self.hash_count = int(hash_count)
         self.salt = binary.ByteArray(salt)
+    
+    def __repr__(self):
+        return "<{} size={!r} hash_count={!r}>".format(type(self).__name__, len(self.state), self.hash_count)
     
     @property
     def positive_rate(self):
@@ -89,27 +55,33 @@ class BloomFilter(object):
     def add(self, value):
         self._false_positive_rate = None
         
-        pass
+        self.state &= self.hash(value)
     
-    
-    def contains(self, value):
-        # returns the probability that the given value is in the set
-        # (integer 0 if not found, otherwise float > 0.0; ≤ 1.0.)
+    def hash(self, data):
+        result = binary.ByteArray(len(self.state))
         
-        return
+        for i in range(self.hash_count):
+            if i > 0:
+                data_to_hash = binary.ByteArray.from_int(i) + data
+            else:
+                data_to_hash = data
+            
+            n = hash_of_int(data_to_hash, 0, len(result.bits))
+            
+            result.bits[n] = True
         
-        pass
+        return result
     
     def __contains__(self, value):
-        return bool(self.contains(self, value))
+        return self.state & self.hash(value)
 
 def hash_of_int(data, low, high, hash_type=hashlib.sha256):
     # Hashes data to produce an integer in the interval [low, high).
     
-    required_bits = math.ciel(math.log(high - low, 2))
+    required_bits = (high - low).bit_length()
     
     while True:
-        candidate = low + int(hash_of_bits(data, required_bits))
+        candidate = low + hash_of_bits(data, required_bits).to_int()
         
         if candidate < high:
             return candidate
@@ -120,12 +92,13 @@ def hash_of_bits(data, bits=256, hash_type=hashlib.sha256):
     # Hashes data to produce a binary.ByteArray() of the specified number of
     # random bits, zero-padded.
     
-    result = hash_of_bytes(data, math.ceil(bits / 8), hash_type)
+    result = hash_of_bytes(data, int(math.ceil(bits / 8)), hash_type)
     
-    doomed_bits = bits % 8
-    
-    if doomed_bits:
-        result[0] &= ((1 << (8 - doomed_bits)) - 1)
+    if bits % 8:
+        doomed_bits = 8 - (bits % 8)
+        
+        if doomed_bits:
+            result[0] &= (255 >> doomed_bits)
     
     return result
 
@@ -134,7 +107,7 @@ def hash_of_bytes(data, bytes=32, hash_type=hashlib.sha256):
     # of random bytes.
     
     hashing = hash_type()
-    result = binary()
+    result = binary.ByteArray()
     
     hashing.update(data)
     result += hashing.digest()
@@ -147,3 +120,18 @@ def hash_of_bytes(data, bytes=32, hash_type=hashlib.sha256):
         result = result[:bytes]
     
     return result
+
+def main():
+    for n in range(100):
+        print(hash_of_bits("fo!o", n).to_int() / (2 ** n))
+    
+    return
+    n = 1
+    values = [binary.ByteArray.from_int(i) for i in range(n)]
+    bloom = BloomFilter.of(values, positive_rate=0.01)
+    print(bloom.positive_rate)
+
+if __name__ == "__main__":
+    import sys
+    
+    sys.exit(main(*sys.argv[1:]))

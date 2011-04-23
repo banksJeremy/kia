@@ -1,6 +1,8 @@
 #!../bin/python
 from __future__ import division
 
+import math
+
 class ByteArray(bytearray):
     # Extends bytearray to be more binary-useful.
     
@@ -17,7 +19,7 @@ class ByteArray(bytearray):
     # 
     # The integer representation is little-endian.
     
-    def __int__(self):
+    def to_int(self):
         result = 0
         
         for byte in reversed(self):
@@ -28,11 +30,14 @@ class ByteArray(bytearray):
         
     @classmethod
     def from_int(cls, value):
-        result = cls()
         value = int(value)
+        result = cls(int(math.ceil(value.bit_length() / 8)))
+        
+        i = len(result) - 1
         
         while value > 0:
-            result.append(value & 255)
+            result[i] = value & 255
+            i -= 1
             value >>= 8
         
         return result
@@ -76,6 +81,14 @@ class ByteArray(bytearray):
     
     def __nonzero__(self):
         return any(self)
+    
+    def __getitem__(self, index):
+        result = bytearray.__getitem__(self, index)
+        
+        if isinstance(index, slice):
+            return type(self)(result)
+        else:
+            return result
 
 class BinaryInterface(object):
     """An bit-level interface for ByteArrays."""
