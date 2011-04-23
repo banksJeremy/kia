@@ -46,7 +46,7 @@ class Key(object):
     
     @property
     def key_data(self):
-        if self._key_data is not None:
+        if self._key_data is None:
             with tempfile.NamedTemporaryFile("w+t") as f:
                 self._key.save_key(f.name, cipher=None, callback=noop)
                 
@@ -88,7 +88,7 @@ class Key(object):
     
     @property
     def domain_id(self):
-        return base64.b32encode(self.digest(self.pub.key_data)).lower()
+        return base64.b32encode(self.digest(self.pub.key_data)).lower().strip("=")
     
     def verify(self, message, signature):
         return bool(self._key.verify_rsassa_pss(self.digest(message), signature, "sha256")) 
@@ -106,9 +106,9 @@ def main():
     
     private = crypto.Key()
     
-    print("Loading public key...")
+    print("Loading private key, then public key from that...")
     
-    public = private.pub
+    public = crypto.Key("private", private.key_data).pub
     
     print("Key's domain id:", public.domain_id)
     
