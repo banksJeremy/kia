@@ -4,6 +4,8 @@ from __future__ import division
 import hashlib
 import math
 
+import binary
+
 """
 false positive rate of Bloom Filters:
 
@@ -69,9 +71,9 @@ class BloomFilter(object):
         return self
     
     def __init__(self, data_or_size, hash_count, salt=""):
-        self.state = binary(data_or_size)
+        self.state = binary.ByteArray(data_or_size)
         self.hash_count = int(hash_count)
-        self.salt = binary(salt)
+        self.salt = binary.ByteArray(salt)
     
     @property
     def positive_rate(self):
@@ -79,7 +81,7 @@ class BloomFilter(object):
         # should be or not.
         
         if self._positive_rate is None:
-            self._positive_rate = (self.state.count_bits() / (len(self.state) * 8)) ** hash_count
+            self._positive_rate = (self.state.bits.count_set() / (len(self.state.bits))) ** hash_count
         
         return self._positive_rate
     _positive_rate = None
@@ -101,11 +103,37 @@ class BloomFilter(object):
     def __contains__(self, value):
         return bool(self.contains(self, value))
 
-def int_hash(data, low, high, salt="", hash_type=hashlib.sha256):
-    raise NotImplementedError()
+def hash_of_int(data, low, high, hash_type=hashlib.sha256):
+    # Hashes data to produce an integer in the interval [low, high).
+    
+    required_bits = math.ciel(math.log(high - low, 2))
+    
+    while True:
+        candidate = low + int(hash_of_bits(data, required_bits))
+        
+        if candidate < high:
+            return candidate
+        else:
+            data.append(0)
 
-def sized_hash(data, bytes=32, salt="", hash_type=hashlib.sha256):
-    hashing = hash_type(salt)
+def hash_of_bits(data, bits=256, hash_type=hashlib.sha256):
+    # Hashes data to produce a binary.ByteArray() of the specified number of
+    # random bits, zero-padded.
+    
+    result = hash_of_bytes(data, math.ceil(bits / 8), hash_type)
+    
+    doomed_bits = bits % 8
+    
+    if doomed_bits:
+        result[0] &= ((1 << (8 - doomed_bits)) - 1)
+    
+    return result
+
+def hash_of_bytes(data, bytes=32, hash_type=hashlib.sha256):
+    # Hashes data to produce a binary.ByteArray() of the specified number
+    # of random bytes.
+    
+    hashing = hash_type()
     result = binary()
     
     hashing.update(data)
@@ -119,78 +147,3 @@ def sized_hash(data, bytes=32, salt="", hash_type=hashlib.sha256):
         result = result[:bytes]
     
     return result
-
-class binary(bytearray):
-    # extends bytearray to support some binary operations
-    
-    @classmethod
-    def from_int(cls, value):
-        backward_bytes = cls()
-        value = int(value)
-        
-        while value > 0:
-            backward_bytes += binary([value & 255])
-            value >>= 8
-        
-        return backward_bytes
-    
-    def get_bit(self, i):
-        raise NotImplementedError()
-    
-    def set_bit(self, i, value):
-        raise NotImplementedError()
-    
-    def __add__(self, other):
-        return type(self)(bytearray.__add__(self, other))
-    
-    def __iadd__(self, other):
-        return bytearray.__iadd__(self, other)
-    
-    def __or__(self, other):
-        return type(self)((a | b) for (a, b) in zip(self, other))
-    
-    def __ior__(self, other):
-        for i, (x, y) in enumerate(zip(self, other)):
-            self[i] = x | y
-        
-        return self
-    
-    def __and__(self, other):
-        return type(self)((a & b) for (a, b) in zip(self, other))
-    
-    def __iand__(self, other):
-        for i, (x, y) in enumerate(zip(self, other)):
-            self[i] = x & y        
-        return self
-    
-    def __xor__(self, other):
-        return type(self)((a ^ b) for (a, b) in zip(self, other))
-    
-    def __ixor__(self, other):
-        for i, (x, y) in enumerate(zip(self, other)):
-            self[i] = x ^ y
-        
-        return self
-    
-    def __invert__(self):
-        return type(self)(~value for value in self)
-    
-    def __nonzero__(self):
-        return any(self)
-    
-    def __int__(self):
-        result = 0
-        
-        for byte in self:
-            result = (result << 8) + byte
-        
-        return result
-    
-    def count_bits(self):
-        count = 0
-        
-        for byte in self:
-            for offset in range(0, 8):
-                count += (byte >> offset) & 1
-        
-        return count
