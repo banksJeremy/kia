@@ -5,11 +5,20 @@ import hashlib
 import math
 
 class BloomFilter(object):
-    @classmethod
-    def with_capacity(cls,  n, false_positive_rate):
-        raise NotImplementedError()
+    # sizes tells us the intended number of values tells us the
+    # hash function used, and vice-versa.
     
-    def __init__(self, size_or_state, values=None):
+    @classmethod
+    def with_values(cls, values, false_positive_rate=0.01):
+        n = len(values)
+        
+    # hash_bits = (size * 8 / n) * math.log(2)
+    # 
+    # density = hash_bits / size
+    # 
+    # rate = (1 - (1 - density) ** n) ** (size * density)
+
+    def __init__(self, state_or_size=None):
         self.state = binary(size_or_state)
         self.size = len(self.state)
         
@@ -131,7 +140,7 @@ def main():
     
     def bloom_false_positive_rate(n, size):
       
-      optimal_bits = (size / n) * math.log(2)
+      optimal_bits = int((size / n) * math.log(2))
       optimal_density = optimal_bits / size
       
       return (1 - (1 - optimal_density) ** n) ** (size * optimal_density)
