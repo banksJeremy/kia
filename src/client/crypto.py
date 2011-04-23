@@ -1,4 +1,4 @@
-#!../bin/python
+#!../../bin/python2.7
 from __future__ import division, print_function, unicode_literals
 
 import base64
@@ -6,6 +6,9 @@ import hashlib
 import tempfile
 
 import M2Crypto
+
+# TODO:
+# Stop using ASCII IO, use M2Crypto.BIO.MemoryBuffer
 
 def noop(*a, **kw):
     "Some M2Crypto functions require callbacks to shut up."

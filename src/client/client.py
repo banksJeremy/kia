@@ -1,4 +1,6 @@
-#!../bin/python
+#!../../bin/python2.7
+from __future__ import division, print_function, unicode_literals
+
 import time
 import base64
 

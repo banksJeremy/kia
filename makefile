@@ -8,12 +8,11 @@ python = python2.7
 help:
 	# make help:
 	# 
+	#   There's nothing to actually make yet, just dependencies.
+	# 
 	#   sudo make install-virtualenv-and-pip
 	#                 - if missing, globally installs distribute, virtualenv
 	#                   and pip, as required other makefile commands.
-	#   
-	#   make run-peer - runs a dnesque client/peer.
-	#   make run-dns  - runs a DNS server connected to a client.
 	#   
 	#   make all      - locally installs and builds everything.
 	#   
@@ -28,19 +27,6 @@ help:
 	#   make purge    - removes all build files, libraries and software.
 	#   
 	# documentation might be available at github.com/jeremybanks/dnesque.
-
-
-run-peer: bin/python \
-          lib/$(python)/site-packages/twisted \
-          lib/$(python)/site-packages/M2Crypto
-	# Running Peer
-	# ============
-	bin/python src/main.py
-
-run-dns: bin/coffee
-	# Running DNS Server
-	# ==================
-	bin/coffee src/dns.coffee
 
 purge: clean
 	# Removing Built Files and Requirements
