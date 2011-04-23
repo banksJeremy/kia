@@ -9,7 +9,7 @@ sys.path[0:0] = [".."]
 import binary
 
 class ByteArrayTests(unittest.TestCase):
-    """Basic tests for binary.ByteArray."""
+    """Basic, non-comprehensive tests for binary.ByteArray."""
     
     def test_integer_conversion_sanity(self):
         self.assertEquals(binary.ByteArray.from_int(0).to_int(), 0)
@@ -107,22 +107,81 @@ class ByteArrayTests(unittest.TestCase):
     
     def test_boolean_conversion(self):
         self.assertEquals(False, bool(binary.ByteArray([])))
-        self.assertEquals(False, bool(binary.ByteArray([0])))
-        self.assertEquals(False, bool(binary.ByteArray([0, 0, 0])))
+        self.assertEquals(True, bool(binary.ByteArray([0])))
         self.assertEquals(True, bool(binary.ByteArray([0, 0, 1])))
         self.assertEquals(True, bool(binary.ByteArray([1, 0, 0])))
         self.assertEquals(True, bool(binary.ByteArray([0, 1, 0])))
         self.assertEquals(True, bool(binary.ByteArray([1, 1, 1])))
         
-    def test_index_access(self):
+    def test_get_index(self):
         self.assertEquals(binary.ByteArray([99])[0], 99)
         self.assertEquals(binary.ByteArray([99, 1, 10])[2], 10)
-        self.assertEquals(binary.ByteArray([99, 1, 10])[:2],
-                          binary.ByteArray([99, 1]))
         self.assertRaises((IndexError, KeyError),
                           lambda: binary.ByteArray([])[0])
         self.assertRaises((IndexError, KeyError),
                           lambda: binary.ByteArray([2, 3])[4])
+    
+    def test_set_index(self):
+        original = binary.ByteArray([1, 2, 3])
+        original[1] = 4
+        
+        self.assertEquals(original, binary.ByteArray([1, 4, 3]))
+    
+    def test_get_slice(self):
+        self.assertEquals(binary.ByteArray([99, 1, 10])[:2],
+                          binary.ByteArray([99, 1]))
+        self.assertEquals(binary.ByteArray([99, 1, 10])[4:],
+                          binary.ByteArray([]))
+    
+    def test_set_slice(self):
+        original = binary.ByteArray([1, 2, 3])
+        original[1:2] = [2, 2]
+        
+        assert isinstance(original, binary.ByteArray)
+        self.assertEquals(original, binary.ByteArray([1, 2, 2, 3]))
+        
+        original2 = binary.ByteArray([1, 2, 3])
+        original2[2:] = [3, 4, 5]
+        
+        assert isinstance(original2, binary.ByteArray)
+        self.assertEquals(original2, binary.ByteArray([1, 2, 3, 4, 5]))
+        
+        original3 = binary.ByteArray([1, 2])
+        original3[2:] = [3, 4, 5]
+        
+        assert isinstance(original3, binary.ByteArray)
+        self.assertEquals(original3, binary.ByteArray([1, 2, 3, 4, 5]))
+
+class BinaryInterfaceTests(unittest.TestCase):
+    """Basic, non-comprehensive tests for binary.BinaryInterface."""
+    
+    def test_get_index(self):
+        raise NotImplementedError("Test not implemented.")
+    
+    def test_set_index(self):
+        raise NotImplementedError("Test not implemented.")
+    
+    def test_get_slice(self):
+        self.skipTest("Feature not implemented.")
+        raise NotImplementedError("Test not implemented.")
+    
+    def test_set_slice(self):
+        self.skipTest("Feature not implemented.")
+        raise NotImplementedError("Test not implemented.")
+    
+    def test_boolean_conversion(self):
+        self.assertEquals(False, bool(binary.ByteArray([])))
+        self.assertEquals(True, bool(binary.ByteArray([16, 9, 1])))
+        self.assertEquals(True, bool(binary.ByteArray([8])))
+        
+    def test_length(self):
+        self.assertEquals(len(binary.ByteArray([16, 9, 1])), 3)
+        self.assertEquals(len(binary.ByteArray([])), 0)
+        self.assertEquals(len(binary.ByteArray([8])), 1)
+    
+    def test_iterate(self):
+        self.assertEquals(list(binary.ByteArray([16, 9]).bits),
+                          [0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0])
 
 main = unittest.main
 

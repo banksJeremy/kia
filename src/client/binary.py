@@ -79,9 +79,6 @@ class ByteArray(bytearray):
     def __invert__(self):
         return type(self)((~value % 256) for value in self)
     
-    def __nonzero__(self):
-        return any(self)
-    
     def __getitem__(self, index):
         result = bytearray.__getitem__(self, index)
         
@@ -118,11 +115,8 @@ class BinaryInterface(object):
     def __len__(self):
         return len(self.byte_array) * 8
     
-    def __nonzero__(self):
-        return any(self.byte_array)
-    
     def __iter__(self):
-        for byte in self:
+        for byte in self.byte_array:
             for offset in range(0, 8):
                 yield (byte >> offset) & 1
 

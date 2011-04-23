@@ -36,7 +36,7 @@ The dnesque software has three parts:
 
 2. A dnesque-DNS bridge connected to a client, allowing systems and software to access dnesque records using the conventional DNS protocol.
 
-3. A browser plugin connected to a client, allowing websites the communicate dnesque information directly *(optional but recommended)*.
+3. A browser plugin/userscript connected to a client, allowing websites the communicate dnesque information directly *(optional but recommended)*.
 
 dnesque clients and bridges can be configured to allow other systems to use them over the network.
 
@@ -64,23 +64,31 @@ Without the browser plugin, dnesque clients may look for updates at the `x-dnesq
 
 The `text/x-dnesque` format is used both in the files read by the browser plugin and by the JSON-RPC communication of the clients. It is encoded in JSON. The root object can be a single object or an array of multiple objects.
 
-The format supports three types of objects:
+Several types of object exist.
 
     {
         "__type": "record",
     
-        "id": "[the second level of the domain,
-                based on hashed public key]",
-        "public_key": "[radix64-encoded public key]",
+        "id": "[the second level of the domain, based on hashed public key
+                (SHOULD be included for software that can't derive it)]",
+        "key": [a key corresponding to the domain],
     
         "record": "[json encoded record (timestamped)]",
         "signature": "[base64-encoded signature]"
     }
 
     {
+        "__type": "key",
+        
+        "type": "[private or public]",
+        "data": "[base64-encoded key]"
+    }
+
+
+    {
         "__type": "peer",
         
-        "host": [[ip address or domain name (DNS or dnesque)], [port]],
+        "address": [[ip address or domain name (DNS or dnesque)], [port]],
         
         "known-ids": [optional bloom filter or list of ids of known domains],
         "known-records: [optional bloom filter of known records],
@@ -101,13 +109,15 @@ Peers may chose to identify themselves using a dnesque domain instead of just an
 
 the client begins with a single known peer: my server. dnesque asks known peers for new peers until it has enough. peers are saved between sessions.
 
-Let nearness describe how many non-direct paths one peer has to connect to another peer (connections through multiple peers count for less): over time dnesque attempts to spread out dense clumps of peers, so that the network's density is more homogeneous. 
+Letting nearness describe how many non-direct paths one peer has to connect to another peer (connections through multiple peers count for less): over time dnesque attempts to spread out "dense" clumps of peers, so that the network's density is more homogeneous. 
 
 When a client is looking for information about a domain (either because a user has requested it or it is concerned that known data has become out of data) it sends requests to nearby peers. Clients remember what peers have requested information from them, and prioritize passing that information along if they become aware of it.
 
 ### Details
 
 Don't exist yet. Updated records are pushed between clients (as well as non-updated records being pushed around randomly or something). If clients set a limit on the size of their local databases they can forget old records that they know are available in a large enough portion of their peers.
+
+Bloom filters will be used liberally.
 
 ### Milestones
 
