@@ -24,7 +24,7 @@ class AsciiArmored(object):
         self.headers = headers or []
     
     @classmethod
-    def loads(cls, s):
+    def loads(cls, s, required_type=None):
         lines = s.split("\n")
         
         # look for opening armor header
@@ -34,13 +34,16 @@ class AsciiArmored(object):
         for index, line in enumerate(lines):
             armor_header_match = re.match("^-{5}BEGIN( (?P<type>.+))?-{5}$", line)
             
-            if armor_header_match:
+            if (armor_header_match
+                and (required_type is None
+                     or armor_header_match.group("type") == required_type)):
                 armor_header_type = armor_header_match.group("type")
                 
                 armor_header_line_index = index
+                
                 break
         else:
-            raise ValueError("No ASCII Armor in input!", s)
+            raise ValueError("Could not find data!", s)
         
         # read ascii armors headers
         
@@ -83,7 +86,7 @@ class AsciiArmored(object):
     def dumps(self):
         lines = []
         
-        lines.append("-----BEGIN " + (self.type) + "-----")
+        lines.append("-----BEGIN " + self.type + "-----")
         
         if self.headers:
             for pair in self.headers:
@@ -91,7 +94,7 @@ class AsciiArmored(object):
             lines.append("")
         
         lines.extend(textwrap.wrap(base64.b64encode(self.data), 64))
-        lines.append("-----END " + (self.type) + "-----")
+        lines.append("-----END " + self.type + "-----")
         lines.append("")
         
         return "\n".join(lines)
