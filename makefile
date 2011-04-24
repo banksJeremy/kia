@@ -7,7 +7,6 @@ python = python2.7
 
 __main:
 	make help
-	# 
 	make test-all
 
 help:
@@ -33,7 +32,7 @@ help:
 	#   
 	# documentation might be available at github.com/jeremybanks/dnesque.
 
-test-all:
+test-all: all
 	for path in src/*/tests; do cd $$path; for test in *.py ; do ./$$test; done; done;
 
 purge: clean
