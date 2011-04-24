@@ -101,38 +101,11 @@ class Key(object):
     
     @classmethod
     def from_json_equivalent(cls, o):
-        return cls(type_=o["type"], data=base64.b64decode(o["data"]))
+        return cls(type_=o["type"],
+                   data=binary.ByteArray(base64.b64decode(o["data"])))
     
     def to_json_equivalent(self):
         return {
             "type": self.type,
             "data": base64.b64encode(self.data)
         }
-
-def main():
-    import crypto
-    
-    print("Generating keypair...")
-    
-    private = crypto.Key()
-    
-    print("Loading private key, then public "
-          "key round-tripping JSON from that...")
-    
-    public = Key.from_json_equivalent(
-        crypto.Key("private", private.data).pub.to_json_equivalent())
-    
-    print("Key's domain id:", public.domain_id)
-    
-    print("Signing message...")
-    
-    message = "Hello, world!"
-    signature = private.sign(message)
-    
-    print("Verifying signature using public key...")
-    print(public.verify(message, signature))
-
-if __name__ == "__main__":
-    import sys
-    
-    sys.exit(main(*sys.argv[1:]))
