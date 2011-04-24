@@ -9,8 +9,10 @@ sys.path[0:0] = [".."]
 import asciiarmor
 import binary
 
-example_signed_pgp_message = (
-"""-----BEGIN PGP SIGNED MESSAGE-----
+class AsciiArmoredTests(unittest.TestCase):
+    def test_pgp_signature(self):
+        signature = asciiarmor.AsciiArmored.loads(
+s="""-----BEGIN PGP SIGNED MESSAGE-----
 Hash: SHA1
 
 Foo, bar yo? Bar, yo foo bar!
@@ -20,22 +22,16 @@ Version: Examplebar Foo
 Charset: utf-8
 
 dGhpcyBpcyBhIHRlc3QsIGhlbGxvIGV4YW1wbGU=
-=000000
------END PGP SIGNATURE-----""")
-
-example_signature_headers = [
-    ("Version", "Examplebar Foo"),
-    ("Charset", "utf-8")
-]
-
-example_signature_data = b"this is a test, hello example"
-
-class AsciiArmoredTests(unittest.TestCase):
-    def test_pgp_signature(self):
-        signature = asciiarmor.AsciiArmored.loads(
-            example_signed_pgp_message, "PGP SIGNATURE")
-        self.assertEqual(signature.headers, example_signature_headers)
-        self.assertEqual(signature.data, example_signature_data)
+-----END PGP SIGNATURE-----""",
+type_="PGP SIGNATURE")
+        
+        self.assertEqual(signature.headers, [
+            ("Version", "Examplebar Foo"),
+            ("Charset", "utf-8")
+        ])
+        
+        self.assertEqual(signature.data,
+            b"this is a test, hello example")
 
 main = unittest.main
 

@@ -24,7 +24,7 @@ class AsciiArmored(object):
         self.headers = headers or []
     
     @classmethod
-    def loads(cls, s, required_type=None):
+    def loads(cls, s, type_=None):
         lines = s.split("\n")
         
         # look for opening armor header
@@ -35,8 +35,8 @@ class AsciiArmored(object):
             armor_header_match = re.match("^-{5}BEGIN( (?P<type>.+))?-{5}$", line)
             
             if (armor_header_match
-                and (required_type is None
-                     or armor_header_match.group("type") == required_type)):
+                and (type_ is None
+                     or type_ == armor_header_match.group("type"))):
                 armor_header_type = armor_header_match.group("type")
                 
                 armor_header_line_index = index
