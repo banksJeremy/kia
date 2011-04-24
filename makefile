@@ -8,7 +8,7 @@ python = python2.7
 __main:
 	make help
 	# 
-	make test-all
+	make all test-all
 
 help:
 	#   There's nothing to actually make yet, just dependencies.
