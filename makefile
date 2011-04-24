@@ -51,7 +51,7 @@ dist/:
 clean:
 	# Removing Built Files
 	# ====================	
-	rm -rf dist/ */*.pyc *.pyc
+	rm -rf dist/ *.pyc */*.pyc */*/*.pyc
 
 all: bin lib/$(python)/site-packages/twisted \
 	     lib/$(python)/site-packages/M2Crypto

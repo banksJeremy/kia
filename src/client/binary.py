@@ -122,20 +122,3 @@ class BinaryInterface(object):
         for byte in self.byte_array:
             for down_shift in range(0, 8):
                 yield (byte >> down_shift) & 1
-
-def main():
-    import binary
-    
-    print("Running sanity check on ByteArray.from_int().to_int()...")
-    
-    for power in range(0, 128, 4):
-        n = 2 ** power
-        b = binary.ByteArray.from_int(n)
-        np = b.to_int()
-        assert n == np, ("Integer<->ByteArray round trip converted "
-                         "{!r} to {!r}!\nbytes: {!r}".format(n, np, list(b)))
-
-if __name__ == "__main__":
-    import sys
-    
-    sys.exit(main(*sys.argv[1:]))

@@ -102,16 +102,3 @@ class AsciiArmored(object):
 loads = AsciiArmored.loads
 
 dumps = lambda *a, **kw: AsciiArmored(*a, **kw).dumps()
-
-def main(action="--encode"):
-    import sys
-    
-    if action == "--decode":
-        sys.stdout.write(AsciiArmored.loads(sys.stdin.read()).data)
-    else:
-        sys.stdout.write(AsciiArmored(sys.stdin.read()).dumps())
-
-if __name__ == "__main__":
-    import sys
-    
-    sys.exit(main(*sys.argv[1:]))
