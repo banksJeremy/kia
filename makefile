@@ -3,13 +3,18 @@ python = python2.7
 # Commands
 # ========
 
-.PHONY: help run-peer run-dns all bin clean purge install-virtualenv-and-pip
+.PHONY: help test-all all bin clean purge install-virtualenv-and-pip __main
+
+__main:
+	make help
+	# 
+	make test-all
 
 help:
-	# make help:
-	# 
 	#   There's nothing to actually make yet, just dependencies.
-	# 
+	#   
+	#   make test-all
+	#   
 	#   sudo make install-virtualenv-and-pip
 	#                 - if missing, globally installs distribute, virtualenv
 	#                   and pip, as required other makefile commands.
@@ -27,6 +32,9 @@ help:
 	#   make purge    - removes all build files, libraries and software.
 	#   
 	# documentation might be available at github.com/jeremybanks/dnesque.
+
+test-all:
+	for path in src/*/tests; do cd $$path; for test in *.py ; do ./$$test; done; done;
 
 purge: clean
 	# Removing Built Files and Requirements
