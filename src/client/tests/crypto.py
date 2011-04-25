@@ -12,12 +12,12 @@ import binary
 
 class BlahTests(unittest.TestCase):
     def test_single_thorough_usae(self):
-        private = crypto.Key()
+        private = crypto.RSAKey()
         message = b"Hello World"
         signature = private.sign(message)
         
-        still_private = crypto.Key.from_json_equivalent(private.to_json_equivalent())
-        public = crypto.Key.from_json_equivalent(still_private.pub.to_json_equivalent())
+        still_private = crypto.RSAKey.from_json_equivalent(private.to_json_equivalent())
+        public = crypto.RSAKey.from_json_equivalent(still_private.pub.to_json_equivalent())
         
         assert public.verify(message, signature)
 

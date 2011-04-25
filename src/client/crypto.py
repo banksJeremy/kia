@@ -26,19 +26,21 @@ class RSAKey(object):
     default_salt_length = 20
     
     def __init__(self, type_="private", data=None):
+        """Generates a new key or loads one (from binary)."""
+        
         if data is None:
             self._key = M2Crypto.RSA.gen_key(self.default_bits, self.default_exponent, noop)
             
-            if type_ == "private"
+            if type_ == "private":
                 self.type = "private"
             else:
                 raise ValueError("Can only generate keys of type \"private\".")
         else:
             if type_ == "private":
-                self.type == "private"
+                self.type = "private"
                 armor_type = "RSA PRIVATE KEY"
             elif type_ == "public":
-                self.type == "public"
+                self.type = "public"
                 armor_type = "PUBLIC KEY"
             else:
                 raise ValueError("Key type must be \"public\" or \"private\", not {!r}".format(type_))
@@ -48,6 +50,8 @@ class RSAKey(object):
             armored = asciiarmor.AsciiArmored(data=self._data, type_=armor_type)
             
             bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
+            
+            print(armored.dumps())
             
             if self.type == "private":
                 self._key = M2Crypto.RSA.load_key_bio(bio)
@@ -60,7 +64,7 @@ class RSAKey(object):
         """
         
         if self._data is None:
-            bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
+            bio = M2Crypto.BIO.MemoryBuffer()
             
             self._key.save_key_bio(bio, cipher=None, callback=noop)
             
@@ -71,7 +75,7 @@ class RSAKey(object):
     _data = None
     
     def __get_pub_data(self):
-        bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
+        bio = M2Crypto.BIO.MemoryBuffer()
         
         self._key.save_pub_key_bio(bio)
         
@@ -81,6 +85,9 @@ class RSAKey(object):
     
     @property
     def pub(self):
+        """The corresponding public key (possibly self).
+        """
+        
         if self.type == "public":
             return self
         else:
@@ -92,7 +99,7 @@ class RSAKey(object):
     
     @property
     def b32_digest_id(self, hash_name=None):
-        """A base-32 identifier of the keypair.
+        """A base-32 32-bit identifier of the keypair.
         
         (Unpadded lowercase base-32 sha-256 digest of the public key.)
         """
@@ -101,18 +108,41 @@ class RSAKey(object):
         
         return base64.b32encode(digest).lower().strip("=")
     
-    def sign(data, hash_name=None, padding=None, salt_length=None):
+    @property
+    def pgp_key_id(self):
+        """The PGP/GPG "key id".
+        
+        (The last 8 bytes of the key's modulus as 0xHEX.)
+        """
+        
+        # M2Crypto does not provide this information through a public
+        # API so I use a private one. I feel only a little bit bad
+        # about this because a) this isn't an essential feature and
+        # b) we're targeting a specific version of M2Crypto so it
+        # would be surprising if this broke.
+        
+        data = getattr(M2Crypto, "__m2crypto").rsa_get_n(self._key.rsa)
+        
+        return "0x" + base64.b16encode(data[-8:])
+    
+    def sign(self, data, hash_name=None, padding=None, salt_length=None):
+        """Generates a signature for some data using the key.
+        """
+        
         if self.type != "private":
             raise ValueError("Private key required to generate signature.")
         
-        digest = hashlib.new(hash_name or self.default_hash_name, data)
+        digest = hashlib.new(hash_name or self.default_hash_name, data).digest()
         
         signature = self._key.sign_rsassa_pss(digest, hash_name or self.default_hash_name)
         
         return binary.ByteArray(signature)
     
-    def verify(data, signature, hash_name=None, padding=None, salt_length=None):
-        digest = hashlib.new(hash_name or self.default_hash_name, data)
+    def verify(self, data, signature, hash_name=None, padding=None, salt_length=None):
+        """Verifies a signature for some data using this key.
+        """
+        
+        digest = hashlib.new(hash_name or self.default_hash_name, data).digest()
         
         result = self._key.sign_rsassa_pss(digest, hash_name or self.default_hash_name)
         
@@ -128,7 +158,6 @@ class RSAKey(object):
             "type": self.type,
             "data": base64.b64encode(self.data)
         }
-
 
 def noop(*a, **kw):
     """Does nothing.
