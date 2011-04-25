@@ -1,9 +1,8 @@
 #!../../bin/python2.7
 """
-This module wraps some features of OpenSLL via M2Crypto. Choices were
-made based on Colin Percival's presentation "Everything you need to
-know about cryptography in 1 hour" (video: http://goo.gl/Zk1RR,
-slides: http://goo.gl/QD92C).
+This module wraps some features of OpenSSL via M2Crypto.
+
+Currently this is just RSA keys that can sign and verify signatures.
 """
 from __future__ import division, print_function, unicode_literals
 
@@ -50,8 +49,6 @@ class RSAKey(object):
             armored = asciiarmor.AsciiArmored(data=self._data, type_=armor_type)
             
             bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
-            
-            print(armored.dumps())
             
             if self.type == "private":
                 self._key = M2Crypto.RSA.load_key_bio(bio)
@@ -115,13 +112,7 @@ class RSAKey(object):
         (The last 8 bytes of the key's modulus as 0xHEX.)
         """
         
-        # M2Crypto does not provide this information through a public
-        # API so I use a private one. I feel only a little bit bad
-        # about this because a) this isn't an essential feature and
-        # b) we're targeting a specific version of M2Crypto so it
-        # would be surprising if this broke.
-        
-        data = getattr(M2Crypto, "__m2crypto").rsa_get_n(self._key.rsa)
+        data = M2Crypto.m2.rsa_get_n(self._key.rsa)
         
         return "0x" + base64.b16encode(data[-8:])
     

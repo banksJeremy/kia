@@ -17,6 +17,7 @@ class BlahTests(unittest.TestCase):
         signature = private.sign(message)
         
         still_private = crypto.RSAKey.from_json_equivalent(private.to_json_equivalent())
+        more_private = crypto.RSAKey("private", still_private.data)
         public = crypto.RSAKey.from_json_equivalent(still_private.pub.to_json_equivalent())
         
         assert public.verify(message, signature)
