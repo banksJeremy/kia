@@ -1,76 +1,83 @@
 #!../../bin/python2.7
+"""
+This module wraps some features of OpenSLL via M2Crypto. Choices were
+made based on Colin Percival's presentation "Everything you need to
+know about cryptography in 1 hour" (video: http://goo.gl/Zk1RR,
+slides: http://goo.gl/QD92C).
+"""
 from __future__ import division, print_function, unicode_literals
 
+import base64 # standard
 import hashlib
 import tempfile
 
-import M2Crypto
+import M2Crypto # external
 
+import asciiarmor # local
 import binary
-import asciiarmor
-import base64
 
-def noop(*a, **kw):
-    "Some M2Crypto functions require callbacks to shut up."
-
-class Key(object):
-    # A class wrapping the functionality needed to do RSASSA-PSS signing
-    # and verification as recommended in Colin Percival's "Everything you
-    # need to know about cryptography in 1 hour" (http://goo.gl/QD92C).
-        
+class RSAKey(object):
+    """A RSA key, public or private, with some associated functionality.
+    """
+    
+    default_bits = 2048
+    default_exponent = 65537
+    default_hash_name = "sha256"
+    default_salt_length = 20
+    
     def __init__(self, type_="private", data=None):
         if data is None:
-            self._key = M2Crypto.RSA.gen_key(2048, 65537, noop)
-            self.type = "private"
-        else:
-            self.type = type_
+            self._key = M2Crypto.RSA.gen_key(self.default_bits, self.default_exponent, noop)
             
-            with tempfile.NamedTemporaryFile("w+t") as f:
-                if self.type == "private":
-                    data_type = "RSA PRIVATE KEY"
-                else:
-                    data_type = "PUBLIC KEY"
-                
-                self._data = data
-                
-                armored = asciiarmor.AsciiArmored(data=data, type_=data_type)
-                
-                f.write(armored.dumps())
-                
-                f.flush()
-                
-                if self.type == "private":
-                    self._key = M2Crypto.RSA.load_key(f.name)
-                else:
-                    self._key = M2Crypto.RSA.load_pub_key(f.name)
+            if type_ == "private"
+                self.type = "private"
+            else:
+                raise ValueError("Can only generate keys of type \"private\".")
+        else:
+            if type_ == "private":
+                self.type == "private"
+                armor_type = "RSA PRIVATE KEY"
+            elif type_ == "public":
+                self.type == "public"
+                armor_type = "PUBLIC KEY"
+            else:
+                raise ValueError("Key type must be \"public\" or \"private\", not {!r}".format(type_))
+            
+            self._data = binary.ByteArray(data)
+            
+            armored = asciiarmor.AsciiArmored(data=self._data, type_=armor_type)
+            
+            bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
+            
+            if self.type == "private":
+                self._key = M2Crypto.RSA.load_key_bio(bio)
+            else:
+                self._key = M2Crypto.RSA.load_pub_key_bio(bio)
     
     @property
     def data(self):
+        """The key in its natural environment (binary).
+        """
+        
         if self._data is None:
-            with tempfile.NamedTemporaryFile("w+t") as f:
-                self._key.save_key(f.name, cipher=None, callback=noop)
-                
-                f.seek(0)
-                
-                pem = f.read()
-                
-                self._data = asciiarmor.loads(pem).data
+            bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
+            
+            self._key.save_key_bio(bio, cipher=None, callback=noop)
+            
+            pem = bio.read()
+            
+            self._data = asciiarmor.loads(pem).data
         return self._data
     _data = None
     
     def __get_pub_data(self):
-        """Loads the public key binary.ByteArray() from the underlying key.
+        bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
         
-        Not meant to be used directly: use .pub.data instead."""
+        self._key.save_pub_key_bio(bio)
         
-        with tempfile.NamedTemporaryFile("w+t") as f:
-            self._key.save_pub_key(f.name)
-            
-            f.seek(0)
-            
-            pem = f.read()
-            
-            return asciiarmor.loads(pem).data
+        pem = bio.read()
+        
+        return asciiarmor.loads(pem).data
     
     @property
     def pub(self):
@@ -83,21 +90,33 @@ class Key(object):
             return self._pub
     _pub = None
     
-    def digest(self, data):
-        return hashlib.sha256(data).digest()
-    
     @property
-    def domain_id(self):
-        return base64.b32encode(self.digest(self.pub.data)).lower().strip("=")
+    def b32_digest_id(self, hash_name=None):
+        """A base-32 identifier of the keypair.
+        
+        (Unpadded lowercase base-32 sha-256 digest of the public key.)
+        """
+        
+        digest = hashlib.new(hash_name or default_hash_name, self.pub.data).digest()
+        
+        return base64.b32encode(digest).lower().strip("=")
     
-    def verify(self, message, signature):
-        return bool(self._key.verify_rsassa_pss(self.digest(message), signature, "sha256")) 
+    def sign(data, hash_name=None, padding=None, salt_length=None):
+        if self.type != "private":
+            raise ValueError("Private key required to generate signature.")
+        
+        digest = hashlib.new(hash_name or self.default_hash_name, data)
+        
+        signature = self._key.sign_rsassa_pss(digest, hash_name or self.default_hash_name)
+        
+        return binary.ByteArray(signature)
     
-    def sign(self, message):
-        if self.type == "private":
-            return self._key.sign_rsassa_pss(self.digest(message), "sha256")
-        else:
-            raise Exception("Private key required to sign messages.")
+    def verify(data, signature, hash_name=None, padding=None, salt_length=None):
+        digest = hashlib.new(hash_name or self.default_hash_name, data)
+        
+        result = self._key.sign_rsassa_pss(digest, hash_name or self.default_hash_name)
+        
+        return bool(result)
     
     @classmethod
     def from_json_equivalent(cls, o):
@@ -109,3 +128,10 @@ class Key(object):
             "type": self.type,
             "data": base64.b64encode(self.data)
         }
+
+
+def noop(*a, **kw):
+    """Does nothing.
+    
+    Some M2Crypto functions require callbacks to shut up.
+    """
