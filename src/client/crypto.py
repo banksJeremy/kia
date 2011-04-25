@@ -48,12 +48,16 @@ class RSAKey(object):
             
             armored = asciiarmor.AsciiArmored(data=self._data, type_=armor_type)
             
-            bio = M2Crypto.BIO.MemoryBuffer(armored.dumps())
-            
-            if self.type == "private":
-                self._key = M2Crypto.RSA.load_key_bio(bio)
-            else:
-                self._key = M2Crypto.RSA.load_pub_key_bio(bio)
+            # I couldn't get M2Crypto.BIO to work instead of using a
+            # tempfile here, but I'm not sure if that was my fault.
+            with tempfile.NamedTemporaryFile() as f:
+                f.write(armored.dumps())
+                f.flush()
+                
+                if self.type == "private":
+                    self._key = M2Crypto.RSA.load_key(f.name)
+                else:
+                    self._key = M2Crypto.RSA.load_pub_key(f.name)
     
     @property
     def data(self):
@@ -81,7 +85,7 @@ class RSAKey(object):
         return asciiarmor.loads(pem).data
     
     @property
-    def pub(self):
+    def public(self):
         """The corresponding public key (possibly self).
         """
         
@@ -101,7 +105,7 @@ class RSAKey(object):
         (Unpadded lowercase base-32 sha-256 digest of the public key.)
         """
         
-        digest = hashlib.new(hash_name or default_hash_name, self.pub.data).digest()
+        digest = hashlib.new(hash_name or self.default_hash_name, self.public.data).digest()
         
         return base64.b32encode(digest).lower().strip("=")
     
@@ -135,7 +139,7 @@ class RSAKey(object):
         
         digest = hashlib.new(hash_name or self.default_hash_name, data).digest()
         
-        result = self._key.sign_rsassa_pss(digest, hash_name or self.default_hash_name)
+        result = self._key.verify_rsassa_pss(digest, signature, hash_name or self.default_hash_name)
         
         return bool(result)
     
