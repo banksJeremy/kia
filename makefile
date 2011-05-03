@@ -38,7 +38,7 @@ test-all: all
 purge: clean
 	# Removing Built Files and Requirements
 	# =====================================
-	rm -rf bin/ dist/ lib/ .Python
+	rm -rf bin/ dist/ lib/ .Python node_modules/
 
 install-virtualenv-and-pip:
 	# Downloading and Installing distribute, pip and virtualenv (globally)
@@ -70,7 +70,7 @@ bin: bin/python bin/pip bin/nodeenv bin/node bin/npm bin/coffee
 
 bin/coffee: bin/node-env/bin/coffee
 	echo '#!/usr/bin/env bash' > bin/coffee
-	echo '`dirname "$$0"`/node-env/bin/node `dirname "$$0"`/node-env/bin/coffee "$$@"' >> bin/coffee
+	echo '`dirname "$$0"`/node-env/bin/node `dirname "$$0"`/node_modules/coffee-script/bin/coffee "$$@"' >> bin/coffee
 	chmod +x bin/coffee
 
 bin/node: bin/node-env
@@ -99,10 +99,15 @@ bin/python:
 # lib/ and such
 # =============
 
+bin/node-env: bin/nodeenv
+	# Downloading and Initializing node.js and npm
+	# ============================================
+	yes | bin/nodeenv --node "0.4.7" --verbose bin/node-env
+
 bin/node-env/bin/coffee: bin/npm
 	# Downloading and Installing CoffeeScript
 	# =======================================
-	bin/npm install "coffee-script@1.0.1"
+	bin/npm install "coffee-script@1.1.0"
 
 lib/$(python)/site-packages/M2Crypto: bin/pip
 	# Downloading M2Crypto
@@ -113,8 +118,3 @@ lib/$(python)/site-packages/twisted: bin/pip
 	# Downloading Twisted
 	# ===================
 	bin/pip install Twisted==11.0.0
-
-bin/node-env: bin/nodeenv
-	# Downloading and Initializing node.js and npm
-	# ============================================
-	bin/nodeenv --node "0.4.3" bin/node-env

@@ -5,3 +5,4 @@ lib/
 dist/
 build/
 *.pyc
+node_modules/
