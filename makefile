@@ -84,7 +84,7 @@ bin/npm: bin/node-env
 bin/nodeenv: bin/pip
 	# Downloading nodeenv
 	# ===================
-	bin/pip install "nodeenv==0.3.0"
+	bin/pip install "nodeenv==0.3.4"
 
 bin/pip: bin/python
 	# Confirming pip installation...
@@ -102,7 +102,7 @@ bin/python:
 bin/node-env: bin/nodeenv
 	# Downloading and Initializing node.js and npm
 	# ============================================
-	yes | bin/nodeenv --node "0.4.7" --verbose bin/node-env
+	bin/nodeenv --node "0.4.7" --verbose bin/node-env
 
 bin/node-env/bin/coffee: bin/npm
 	# Downloading and Installing CoffeeScript
