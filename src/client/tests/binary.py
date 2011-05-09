@@ -7,6 +7,9 @@ import sys
 sys.path[0:0] = [".."]
 
 import binary
+import json_serialization
+
+json = json_serialization.JsonSerializer()
 
 class ByteArrayTests(unittest.TestCase):
     """Basic, non-comprehensive tests for binary.ByteArray."""
@@ -151,6 +154,34 @@ class ByteArrayTests(unittest.TestCase):
         
         assert isinstance(original3, binary.ByteArray)
         self.assertEquals(original3, binary.ByteArray([1, 2, 3, 4, 5]))
+    
+    def test_to_json_equvilent(slef):
+        original = binary.ByteArray([0, 1, 2, 3, 5, 9])
+        original2 = binary.ByteArray(b"Hello, World!!")
+        original3 = binary.ByteArray(b"Hello, World!!" + b"\x00" * 6)
+        original4 = binary.ByteArray(b"Hello, World!!" + b"\x00" * 7)
+        
+        j = lambda o, e=None: repr(json.dumps(o.to_json_equivilent(e)))
+        
+        assert json.dumps(original.to_json_equivilent()) == '{"data":"AAECAwUJ","encoding":"base64"}'
+        assert json.dumps(original2.to_json_equivilent()) == '{"data":"Hello, World!!"}'
+        assert json.dumps(original3.to_json_equivilent()) == '{"data":"SGVsbG8sIFdvcmxkISEAAAAAAAA=","encoding":"base64"}'
+        assert json.dumps(original4.to_json_equivilent()) == '{"data":"SGVsbG8sIFdvcmxkISEAAAAAAAAA","encoding":"base64"}'
+        
+        assert json.dumps(original.to_json_equivilent("text")) != json.dumps(original.to_json_equivilent("base64"))
+        assert json.dumps(original2.to_json_equivilent("text")) != json.dumps(original2.to_json_equivilent("base64"))
+        assert json.dumps(original3.to_json_equivilent("text")) != json.dumps(original3.to_json_equivilent("base64"))
+        assert json.dumps(original4.to_json_equivilent("text")) != json.dumps(original4.to_json_equivilent("base64"))
+        
+        assert len(json.dumps(original.to_json_equivilent())) <= len(json.dumps(original.to_json_equivilent("base64")))
+        assert len(json.dumps(original.to_json_equivilent())) <= len(json.dumps(original.to_json_equivilent("text")))
+        assert len(json.dumps(original2.to_json_equivilent())) <= len(json.dumps(original2.to_json_equivilent("base64")))
+        assert len(json.dumps(original2.to_json_equivilent())) <= len(json.dumps(original2.to_json_equivilent("text")))
+        assert len(json.dumps(original3.to_json_equivilent())) <= len(json.dumps(original3.to_json_equivilent("base64")))
+        assert len(json.dumps(original3.to_json_equivilent())) <= len(json.dumps(original3.to_json_equivilent("text")))
+        assert len(json.dumps(original4.to_json_equivilent())) <= len(json.dumps(original4.to_json_equivilent("base64")))
+        assert len(json.dumps(original4.to_json_equivilent())) <= len(json.dumps(original4.to_json_equivilent("text")))
+        
 
 class BinaryInterfaceTests(unittest.TestCase):
     """Basic, non-comprehensive tests for binary.BinaryInterface."""

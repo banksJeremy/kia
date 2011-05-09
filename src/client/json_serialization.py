@@ -27,9 +27,9 @@ class JsonSerializer(object):
             self.sort_keys = sort_keys
         
         self.value_serializer = self._make_value_serializer()
-        self.object_hook = self._make_object_hook()
+        self.object_hook = self.object_hook
     
-    def dump(obj, fp, indent=None, separators=None):
+    def dump(self, obj, fp, indent=None, separators=None):
         """Serialize an object and write it to a file."""
         
         return json.dump(obj=obj, fp=fp,
@@ -37,7 +37,7 @@ class JsonSerializer(object):
                          separators=separators or self.separators,
                          default=self.value_serializer)
     
-    def dumps(obj, indent=None, separators=None):
+    def dumps(self, obj, indent=None, separators=None):
         """Serialize an object and return it as a string."""
         
         return json.dumps(obj=obj,
@@ -45,14 +45,14 @@ class JsonSerializer(object):
                           separators=separators or self.separators,
                           default=self.value_serializer)
     
-    def load(fp):
+    def load(self, fp):
         """Loads and deserializes an object from a file."""
         
         return json.load(fp=fp,
                          object_hook=self.object_hook,
                          parse_constant=self._parse_constant)
     
-    def loads(s):
+    def loads(self, s):
         """Deserializes an object from a string."""
         
         return json.load(s=s,
@@ -75,7 +75,7 @@ class JsonSerializer(object):
         return self._constants[name]
     
     def object_hook(self, o):
-        if self.type_property in o and o[self.type_property] in types:
+        if self.type_property in o and o[self.type_property] in self.types:
             return (self.types[o[TYPE_PROPERTY]]
                     .from_json_equivalent(o))
         else:
@@ -83,8 +83,8 @@ class JsonSerializer(object):
         
         return object_hook
 
-    def _make_value_serializer():
-        if types is not None:
+    def _make_value_serializer(self):
+        if self.types is not None:
             def default(o):
                 if hasattr(o, "to_json_equivalent"):
                     for name, cls in types.items():

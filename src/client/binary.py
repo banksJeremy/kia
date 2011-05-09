@@ -3,7 +3,9 @@ from __future__ import division, print_function, unicode_literals
 
 import math
 import base64
-import json
+import json_serialization
+
+json = json_serialization.JsonSerializer()
 
 class ByteArray(bytearray):
     """An more binary-useful extension of the bytearray type."""
@@ -89,23 +91,37 @@ class ByteArray(bytearray):
         else:
             return result
     
-    def to_json_equivilent(self):
+    def to_json_equivilent(self, encoding=None):
         # We try encoding this as `text` and as `base64` and use the
-        # one that's smaller when further encoded as JSON.
+        # one that's smaller when json.dumps()ed.
         
-        base64_encoded = base64.b64encode(self.data)
-        text_encoded = "".join(map(chr, self))
-        
-        if len(json.encode(text_encoded)) - 2 <= len(base64_encoded):
-            return {
-              # "encoding": "text", # default, omitted
-                "data": text_encoded
+        if encoding == "text" or encoding is None:
+            text_encoded = {
+                "data": "".join(map(chr, self))
             }
-        else:
-            return {
+            
+            if encoding == "text":
+                return text_encoded
+        
+        if encoding == "base64" or encoding is None:
+            base64_encoded = {
                 "encoding": "base64",
-                "data": base64_encoded
+                "data": base64.b64encode(self)
             }
+            
+            if encoding == "base64":
+                return base64_encoded
+        
+        if encoding is not None:
+            raise ValueError("Unknown encoding.")
+        
+        text_json = json.dumps(text_encoded)
+        base64_json = json.dumps(base64_encoded)
+        
+        if len(text_json) <= len(base64_json):
+            return text_encoded
+        else:
+            return base64_encoded
     
     @classmethod
     def from_json_equivilent(cls, o):
