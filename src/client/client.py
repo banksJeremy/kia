@@ -48,6 +48,14 @@ def main(command=None, *args):
                 sys.stderr.write("Failed to verify key.\n")
                 return 1
         
+        elif subcommand == "read-signed":
+            try:
+                sys.stdout.write(json.load(sys.stdin).data)
+                return 0
+            except Exception as e:
+                sys.stderr.write("Failed to verify key.\n")
+                return 1
+        
         else:
             raise ValueError("Unknown command.")
 
