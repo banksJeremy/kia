@@ -2,6 +2,8 @@
 from __future__ import division, print_function, unicode_literals
 
 import math
+import base64
+import json
 
 class ByteArray(bytearray):
     """An more binary-useful extension of the bytearray type."""
@@ -86,6 +88,37 @@ class ByteArray(bytearray):
             return type(self)(result)
         else:
             return result
+    
+    def to_json_equivilent(self):
+        # We try encoding this as `text` and as `base64` and use the
+        # one that's smaller when further encoded as JSON.
+        
+        base64_encoded = base64.b64encode(self.data)
+        text_encoded = "".join(map(chr, self))
+        
+        if len(json.encode(text_encoded)) - 2 <= len(base64_encoded):
+            return {
+              # "encoding": "text", # default, omitted
+                "data": text_encoded
+            }
+        else:
+            return {
+                "encoding": "base64",
+                "data": base64_encoded
+            }
+    
+    @classmethod
+    def from_json_equivilent(cls, o):
+        encoding = o.get("encoding", "text")
+        
+        assert isinstance(o.data, str)
+        
+        if encoding == "text":
+            return ByteArray(map(ord, o.data))
+        elif encoding == "base64":
+            return ByteArray(base64.b64decode(o.data))
+        else:
+            raise "Unknown encoding: {}".format(encoding)
 
 class BinaryInterface(object):
     """An bit-level sequence interface for ByteArrays."""
