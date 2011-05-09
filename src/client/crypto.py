@@ -146,14 +146,21 @@ class RSAKey(object):
     
     @classmethod
     def from_json_equivilent(cls, o):
-        return cls(type_=o.get("type", None),
-                   data=o["data"])
+        result = cls(type_=o.get("type", None),
+                     data=o["data"])
+        
+        if "b32_id" in o:
+            assert o["b32_id"] == result.b32_id
+        
+        return result
     
-    def to_json_equivilent(self):
+    def to_json_equivilent(self, transparent=False):
         o = {
-            "data": self.data,
-            "b32_id": self.b32_id
+            "data": self.data
         }
+        
+        if transparent:
+            o["b32_id"] = self.b32_id
         
         if self.type == "private":
             o["type"] = "private"
@@ -166,6 +173,7 @@ class SignedBinary(object):
         self.key = key
         self.signature = signature
         
+        print(self.key)
         assert isinstance(self.key, RSAKey)
         
         self.key.verify(data, signature)
@@ -174,11 +182,11 @@ class SignedBinary(object):
     def from_json_equivilent(cls, o):
         return cls(o["data"], o["key"], o["signature"])
     
-    def to_json_equivilent(self):
+    def to_json_equivilent(self, transparent=False):
         return {
-            "data": self.data,
-            "key": self.key,
-            "signature": self.signature
+            "data": self.data.to_json_equivilent("text" if transparent else None),
+            "key": self.key.to_json_equivilent(transparent),
+            "signature": self.signature,
         }
 
 def noop(*a, **kw):

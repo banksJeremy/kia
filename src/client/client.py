@@ -23,13 +23,13 @@ def main(command=None, *args):
             assert not subargs, "command takes no arguments"
             
             json.dump(crypto.RSAKey(), sys.stdout)
-            sys.stdout.write("\n")
+            sys.stderr.write("\n")
     
         elif subcommand == "public":
             assert not subargs, "command takes no arguments"
             
             json.dump(json.load(sys.stdin).public, sys.stdout)
-            sys.stdout.write("\n")
+            sys.stderr.write("\n")
     
         elif subcommand == "sign":
             key_path, = subargs

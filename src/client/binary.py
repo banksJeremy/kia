@@ -1,9 +1,11 @@
 #!../../bin/python2.7
 from __future__ import division, print_function, unicode_literals
 
-import binary
-import math
 import base64
+import bz2
+import math
+
+import binary
 import json_serialization
 
 json = json_serialization.JsonSerializer()
@@ -113,16 +115,28 @@ class ByteArray(bytearray):
             if encoding == "base64":
                 return base64_encoded
         
+        if encoding == "bzip2-base64" or encoding is None:
+            bzip2_base64_encoded = {
+                "encoding": "bzip2-base64",
+                "data": base64.b64encode(bz2.compress(self))
+            }
+            
+            if encoding == "bzip2-base64":
+                return bzip2_base64_encoded
+        
         if encoding is not None:
             raise ValueError("Unknown encoding.")
         
         text_json = json.dumps(text_encoded)
         base64_json = json.dumps(base64_encoded)
+        bzip2_base64_json = json.dumps(bzip2_base64_encoded)
         
-        if len(text_json) <= len(base64_json):
+        if len(text_json) <= len(base64_json) and len(text_json) <= len(bzip2_base64_json):
             return text_encoded
-        else:
+        elif len(base64_json) <= len(bzip2_base64_json):
             return base64_encoded
+        else:
+            return bzip2_base64_encoded
     
     @classmethod
     def from_json_equivilent(cls, o):
@@ -134,6 +148,8 @@ class ByteArray(bytearray):
             return ByteArray(map(ord, o["data"]))
         elif encoding == "base64":
             return ByteArray(base64.b64decode(o["data"]))
+        elif encoding == "bzip2-base64":
+            return ByteArray(bz2.decompress(base64.b64decode(o["data"])))
         else:
             raise "Unknown encoding: {}".format(encoding)
 
