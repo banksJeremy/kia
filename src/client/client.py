@@ -7,8 +7,7 @@ import json_serialization
 json = json_serialization.JsonSerializer({
     "rsa-key": crypto.RSAKey,
     "signed-binary": crypto.SignedBinary,
-    "binary": binary.ByteArray,
-    "record": Record
+    "binary": binary.ByteArray
 })
 
 class Client(object):
