@@ -38,11 +38,9 @@ class RSAKey(object):
             if type_ == "private":
                 self.type = "private"
                 armor_type = "RSA PRIVATE KEY"
-            elif type_ == "public":
+            else:
                 self.type = "public"
                 armor_type = "PUBLIC KEY"
-            else:
-                raise ValueError("Key type must be \"public\" or \"private\", not {!r}".format(type_))
             
             self._data = binary.ByteArray(data)
             
@@ -99,7 +97,7 @@ class RSAKey(object):
     _pub = None
     
     @property
-    def b32_digest_id(self, hash_name=None):
+    def b32_id(self, hash_name=None):
         """A base-32 32-bit identifier of the keypair.
         
         (Unpadded lowercase base-32 sha-256 digest of the public key.)
@@ -133,6 +131,9 @@ class RSAKey(object):
         
         return binary.ByteArray(signature)
     
+    def wrap_signature(self, data):
+        return SignedBinary(data, self.public, self.sign(data))
+    
     def verify(self, data, signature, hash_name=None, padding=None, salt_length=None):
         """Verifies a signature for some data using this key.
         """
@@ -144,18 +145,41 @@ class RSAKey(object):
         return bool(result)
     
     @classmethod
-    def from_json_equivalent(cls, o):
-        return cls(type_=o["type"],
-                   data=binary.ByteArray(base64.b64decode(o["data"])))
+    def from_json_equivilent(cls, o):
+        return cls(type_=o.get("type", None),
+                   data=o["data"])
     
-    def to_json_equivalent(self):
-        return {
-            "type": self.type,
-            "data": base64.b64encode(self.data)
+    def to_json_equivilent(self):
+        o = {
+            "data": self.data,
+            "b32_id": self.b32_id
         }
+        
+        if self.type == "private":
+            o["type"] = "private"
+        
+        return o
 
 class SignedBinary(object):
-    pass
+    def __init__(self, data, key, signature):
+        self.data = data
+        self.key = key
+        self.signature = signature
+        
+        assert isinstance(self.key, RSAKey)
+        
+        self.key.verify(data, signature)
+    
+    @classmethod
+    def from_json_equivilent(cls, o):
+        return cls(o["data"], o["key"], o["signature"])
+    
+    def to_json_equivilent(self):
+        return {
+            "data": self.data,
+            "key": self.key,
+            "signature": self.signature
+        }
 
 def noop(*a, **kw):
     """Does nothing.

@@ -1,6 +1,7 @@
 #!../../bin/python2.7
 from __future__ import division, print_function, unicode_literals
 
+import binary
 import math
 import base64
 import json_serialization
@@ -97,7 +98,7 @@ class ByteArray(bytearray):
         
         if encoding == "text" or encoding is None:
             text_encoded = {
-                "data": "".join(map(chr, self))
+                "data": "".join(map(unichr, self))
             }
             
             if encoding == "text":
@@ -127,12 +128,12 @@ class ByteArray(bytearray):
     def from_json_equivilent(cls, o):
         encoding = o.get("encoding", "text")
         
-        assert isinstance(o.data, str)
+        assert isinstance(o["data"], (str, unicode))
         
         if encoding == "text":
-            return ByteArray(map(ord, o.data))
+            return ByteArray(map(ord, o["data"]))
         elif encoding == "base64":
-            return ByteArray(base64.b64decode(o.data))
+            return ByteArray(base64.b64decode(o["data"]))
         else:
             raise "Unknown encoding: {}".format(encoding)
 

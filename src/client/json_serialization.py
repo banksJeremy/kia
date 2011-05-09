@@ -27,13 +27,13 @@ class JsonSerializer(object):
             self.sort_keys = sort_keys
         
         self.value_serializer = self._make_value_serializer()
-        self.object_hook = self.object_hook
     
     def dump(self, obj, fp, indent=None, separators=None):
         """Serialize an object and write it to a file."""
         
         return json.dump(obj=obj, fp=fp,
                          indent=indent or self.indent,
+                         sort_keys=self.sort_keys,
                          separators=separators or self.separators,
                          default=self.value_serializer)
     
@@ -42,6 +42,7 @@ class JsonSerializer(object):
         
         return json.dumps(obj=obj,
                           indent=indent or self.indent,
+                          sort_keys=self.sort_keys,
                           separators=separators or self.separators,
                           default=self.value_serializer)
     
@@ -55,9 +56,9 @@ class JsonSerializer(object):
     def loads(self, s):
         """Deserializes an object from a string."""
         
-        return json.load(s=s,
-                         object_hook=self.object_hook,
-                         parse_constant=self._parse_constant)
+        return json.loads(s=s,
+                          object_hook=self.object_hook,
+                          parse_constant=self._parse_constant)
     
     type_property = "__type__"
     
@@ -76,29 +77,28 @@ class JsonSerializer(object):
     
     def object_hook(self, o):
         if self.type_property in o and o[self.type_property] in self.types:
-            return (self.types[o[TYPE_PROPERTY]]
-                    .from_json_equivalent(o))
+            return (self.types[o[self.type_property]]
+                    .from_json_equivilent(o))
         else:
             return o
-        
-        return object_hook
 
     def _make_value_serializer(self):
         if self.types is not None:
             def default(o):
-                if hasattr(o, "to_json_equivalent"):
-                    for name, cls in types.items():
+                if hasattr(o, "to_json_equivilent"):
+                    for name, cls in self.types.items():
                         if isinstance(o, cls):
-                            result = o.json_equivalent()
+                            result = o.to_json_equivilent()
                             
-                            result[TYPE_PROPERTY] = name
+                            result[self.type_property] = name
                             return result
                     else:
-                        raise TypeError("{}s can not be serialized."
-                                        .format(type(o).__name))
+                        raise TypeError("{}s not known to serializer."
+                                        .format(type(o).__name__))
                 else:
-                    raise TypeError("{}s can not be serialized."
-                                    .format(type(o).__name))
+                    print(dir(o))
+                    raise TypeError("{}s can not be JSON-serialized."
+                                    .format(type(o).__name__))
             
             return default
         else:
