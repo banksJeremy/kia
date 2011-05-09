@@ -154,6 +154,9 @@ class RSAKey(object):
             "data": base64.b64encode(self.data)
         }
 
+class SignedBinary(object):
+    pass
+
 def noop(*a, **kw):
     """Does nothing.
     

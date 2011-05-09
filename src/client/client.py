@@ -1,8 +1,18 @@
 #!../../bin/python2.7
 from __future__ import division, print_function, unicode_literals
 
+import sys
+
+import binary
 import crypto
 import json_serialization
+
+def main(command=None, *args):
+    sys.stderr.write("Usage: {0} serve [port=80]\n"
+                     "       {0} key generate [key.json=-]\n"
+                     "       {0} key get-public [key.json=-] [key.pub.json=-]\n"
+                     "       {0} key sign key.json [data=-]\n"
+                     .format(sys.argv[0]))
 
 json = json_serialization.JsonSerializer({
     "rsa-key": crypto.RSAKey,
