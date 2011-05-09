@@ -7,20 +7,54 @@ import binary
 import crypto
 import json_serialization
 
-def main(command=None, *args):
-    sys.stderr.write("Usage: {0} serve [port=80]\n"
-                     "       {0} key generate [key.json=-]\n"
-                     "       {0} key get-public [key.json=-] [key.pub.json=-]\n"
-                     "       {0} key sign key.json [data=-]\n"
-                     .format(sys.argv[0]))
-
 json = json_serialization.JsonSerializer({
     "rsa-key": crypto.RSAKey,
     "signed-binary": crypto.SignedBinary,
     "binary": binary.ByteArray
 })
 
-class Client(object):
+
+def main(command=None, *args):
+    if command == "key":
+        subcommand = args[0]
+        subargs = args[1:]
+        
+        if subcommand == "generate":
+            assert not subargs, "command takes no arguments"
+            
+            json.dump(crypto.RSAKey(), sys.stdout)
+            sys.stdout.write("\n")
+    
+        elif subcommand == "public":
+            assert not subargs, "command takes no arguments"
+            
+            json.dump(json.load(sys.stdin).public, sys.stdout)
+            sys.stdout.write("\n")
+    
+        elif subcommand == "sign":
+            key_path, = subargs
+            
+            with open(key_path) as f:
+                key = json.load(f)
+            
+            json.dump(key.wrap_signature(binary.ByteArray(sys.stdin.read())), sys.stdout)
+        
+        elif subcommand == "verify":
+            try:
+                json.load(sys.stdin)
+                sys.stderr.write("Key verified.\n")
+                return 0
+            except Exception as e:
+                sys.stderr.write("Failed to verify key.\n")
+                return 1
+        
+        else:
+            raise ValueError("Unknown command.")
+
+    else:
+        raise ValueError("Unknown command.")
+
+class JsonRpcInterface(object):
     default_address = ("127.0.0.1", 80)
     
     def __init__(self, address=None, data=None, related_domain=None):
@@ -71,9 +105,6 @@ class Client(object):
         
         except Exception, e:
             return "Update failed:", e
-
-def main():
-    raise NotImplementedError()
 
 if __name__ == "__main__":
     import sys
