@@ -179,20 +179,3 @@ class BinaryInterface(object):
         for byte in self.byte_array:
             for down_shift in range(0, 8):
                 yield (byte >> down_shift) & 1
-
-def main():
-    data = ByteArray()
-    
-    serializer = json_serialization.JsonSerializer({"binary": ByteArray})
-    
-    data = ByteArray(range(256)) + \
-           ByteArray(range(0, 256, 3)) + \
-           ByteArray(range(0, 256, 1)) + \
-           ByteArray(range(0, 256, 9))
-    
-    print(json.dumps(data.to_json_equivilent()))
-
-if __name__ == "__main__":
-    import sys
-    
-    sys.exit(main(*sys.argv[1:]))
