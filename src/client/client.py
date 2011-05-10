@@ -30,7 +30,7 @@ def main(command=None, *args):
             sys.stderr.write("\n")
     
         elif subcommand == "sign":
-            key_path, = subargs
+            key_path = subargs[0]
             
             with open(key_path) as f:
                 key = json.load(f)

@@ -109,7 +109,7 @@ class ByteArray(bytearray):
          lambda data: ByteArray(base64.b64decode(bz2.decompress(data))))
     ]
     
-    def to_json_equivalent(self, encoding_limit=None):
+    def to_dynamic_json_equivalent(self, recur, encoding_limit=False, **options):
         # We use the most compact encoding not beyond encoding_limit.
         
         best_len = None

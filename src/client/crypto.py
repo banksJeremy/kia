@@ -181,10 +181,10 @@ class SignedBinary(object):
     def from_json_equivalent(cls, o):
         return cls(o["data"], o["key"], o["signature"])
     
-    def to_json_equivalent(self, transparent=False):
+    def to_dynamic_json_equivalent(self, recur, transparent=False, **options):
         return {
-            "data": self.data, #.to_json_equivalent("text" if transparent else None),
-            "key": self.key, #.to_json_equivalent(transparent),
+            "data": recur(self.data, encoding_limit="text" if transparent else None),
+            "key": self.key,
             "signature": self.signature,
         }
 
