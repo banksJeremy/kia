@@ -8,11 +8,13 @@ class JsonSerializer(object):
     """Provides JSON serialization for a set of classes."""
     
     def __init__(self, types=None, type_property=None, sort_keys=None,
-                 indent=None, separators=None):
+                 indent=None, separators=None, **options):
         if types:
             self.types = dict(types)
         else:
             self.types = None
+        
+        self.options = options
         
         if type_property is not None:
             self.type_property = type_property
@@ -78,7 +80,7 @@ class JsonSerializer(object):
     def object_hook(self, o):
         if self.type_property in o and o[self.type_property] in self.types:
             return (self.types[o[self.type_property]]
-                    .from_json_equivilent(o))
+                    .from_json_equivilent(o, *self.options))
         else:
             return o
 

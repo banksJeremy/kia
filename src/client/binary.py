@@ -3,7 +3,9 @@ from __future__ import division, print_function, unicode_literals
 
 import base64
 import bz2
+import itertools
 import math
+import zlib
 
 import binary
 import json_serialization
@@ -58,13 +60,10 @@ class ByteArray(bytearray):
         return bytearray.__iadd__(self, other)
     
     def __or__(self, other):
-        return type(self)((a | b) for (a, b) in zip(self, other))
+        return type(self)((a | b) for (a, b) in itertools.izip_longest(self, other, fillvalue=0))
     
     def __ior__(self, other):
-        for i, (x, y) in enumerate(zip(self, other)):
-            self[i] = x | y
-        
-        return self
+        return NotImplemented
     
     def __and__(self, other):
         return type(self)((a & b) for (a, b) in zip(self, other))
@@ -75,13 +74,10 @@ class ByteArray(bytearray):
         return self
     
     def __xor__(self, other):
-        return type(self)((a ^ b) for (a, b) in zip(self, other))
+        return type(self)((a ^ b) for (a, b) in itertools.izip_longest(self, other, fillvalue=0))
     
     def __ixor__(self, other):
-        for i, (x, y) in enumerate(zip(self, other)):
-            self[i] = x ^ y
-        
-        return self
+        return NotImplemented
     
     def __invert__(self):
         return type(self)((~value % 256) for value in self)
@@ -94,62 +90,57 @@ class ByteArray(bytearray):
         else:
             return result
     
-    def to_json_equivilent(self, encoding=None):
-        # We try encoding this as `text` and as `base64` and use the
-        # one that's smaller when json.dumps()ed.
+    # JSON Serialization
+    
+    json_default_encoding = "text"
+    
+    json_encodings = [
+        ("text",
+         lambda data: "".join(map(unichr, data)),
+         lambda data: ByteArray(map(ord, data))),
+        ("base64",
+         lambda data: base64.b64encode(data),
+         lambda data: ByteArray(base64.b64decode(data))),
+        ("zlib-base64",
+         lambda data: base64.b64encode(zlib.compress(bytes(data), 9)),
+         lambda data: ByteArray(base64.b64decode(zlib.decompress(data)))),
+        ("bzip2-base64",
+         lambda data: base64.b64encode(bz2.compress(data, 9)),
+         lambda data: ByteArray(base64.b64decode(bz2.decompress(data))))
+    ]
+    
+    def to_json_equivilent(self, encoding_limit=None):
+        # We use the most compact encoding not beyond encoding_limit.
         
-        if encoding == "text" or encoding is None:
-            text_encoded = {
-                "data": "".join(map(unichr, self))
-            }
+        best_len = None
+        best_encoding = None
+        
+        for encoding, encode, decode in self.json_encodings:
+            encoded = { "data": encode(self) }
             
-            if encoding == "text":
-                return text_encoded
-        
-        if encoding == "base64" or encoding is None:
-            base64_encoded = {
-                "encoding": "base64",
-                "data": base64.b64encode(self)
-            }
+            if encoding != self.json_default_encoding:
+                encoded["encoding"] = encoding
             
-            if encoding == "base64":
-                return base64_encoded
-        
-        if encoding == "bzip2-base64" or encoding is None:
-            bzip2_base64_encoded = {
-                "encoding": "bzip2-base64",
-                "data": base64.b64encode(bz2.compress(self))
-            }
+            jsoned = json.dumps(encoded)
             
-            if encoding == "bzip2-base64":
-                return bzip2_base64_encoded
+            if best_len is None or len(jsoned) < best_len:
+                best_encoded = encoded
+                best_len = len(jsoned)
+            
+            if encoding == encoding_limit:
+                break
         
-        if encoding is not None:
-            raise ValueError("Unknown encoding.")
-        
-        text_json = json.dumps(text_encoded)
-        base64_json = json.dumps(base64_encoded)
-        bzip2_base64_json = json.dumps(bzip2_base64_encoded)
-        
-        if len(text_json) <= len(base64_json) and len(text_json) <= len(bzip2_base64_json):
-            return text_encoded
-        elif len(base64_json) <= len(bzip2_base64_json):
-            return base64_encoded
-        else:
-            return bzip2_base64_encoded
+        return best_encoded
     
     @classmethod
     def from_json_equivilent(cls, o):
-        encoding = o.get("encoding", "text")
+        encoding = o.get("encoding", cls.json_default_encoding)
         
         assert isinstance(o["data"], (str, unicode))
         
-        if encoding == "text":
-            return ByteArray(map(ord, o["data"]))
-        elif encoding == "base64":
-            return ByteArray(base64.b64decode(o["data"]))
-        elif encoding == "bzip2-base64":
-            return ByteArray(bz2.decompress(base64.b64decode(o["data"])))
+        for possible_encoding, encode, decode in cls.json_encodings:
+            if possible_encoding == encoding:
+                return decode(o["data"])
         else:
             raise "Unknown encoding: {}".format(encoding)
 
@@ -188,3 +179,20 @@ class BinaryInterface(object):
         for byte in self.byte_array:
             for down_shift in range(0, 8):
                 yield (byte >> down_shift) & 1
+
+def main():
+    data = ByteArray()
+    
+    serializer = json_serialization.JsonSerializer({"binary": ByteArray})
+    
+    data = ByteArray(range(256)) + \
+           ByteArray(range(0, 256, 3)) + \
+           ByteArray(range(0, 256, 1)) + \
+           ByteArray(range(0, 256, 9))
+    
+    print(json.dumps(data.to_json_equivilent()))
+
+if __name__ == "__main__":
+    import sys
+    
+    sys.exit(main(*sys.argv[1:]))

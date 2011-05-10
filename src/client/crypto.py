@@ -184,8 +184,8 @@ class SignedBinary(object):
     
     def to_json_equivilent(self, transparent=False):
         return {
-            "data": self.data.to_json_equivilent("text" if transparent else None),
-            "key": self.key.to_json_equivilent(transparent),
+            "data": self.data, #.to_json_equivilent("text" if transparent else None),
+            "key": self.key, #.to_json_equivilent(transparent),
             "signature": self.signature,
         }
 
