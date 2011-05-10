@@ -145,7 +145,7 @@ class RSAKey(object):
         return bool(result)
     
     @classmethod
-    def from_json_equivilent(cls, o):
+    def from_json_equivalent(cls, o):
         result = cls(type_=o.get("type", None),
                      data=o["data"])
         
@@ -154,7 +154,7 @@ class RSAKey(object):
         
         return result
     
-    def to_json_equivilent(self, transparent=False):
+    def to_json_equivalent(self, transparent=False):
         o = {
             "data": self.data
         }
@@ -179,13 +179,13 @@ class SignedBinary(object):
         self.key.verify(data, signature)
     
     @classmethod
-    def from_json_equivilent(cls, o):
+    def from_json_equivalent(cls, o):
         return cls(o["data"], o["key"], o["signature"])
     
-    def to_json_equivilent(self, transparent=False):
+    def to_json_equivalent(self, transparent=False):
         return {
-            "data": self.data, #.to_json_equivilent("text" if transparent else None),
-            "key": self.key, #.to_json_equivilent(transparent),
+            "data": self.data, #.to_json_equivalent("text" if transparent else None),
+            "key": self.key, #.to_json_equivalent(transparent),
             "signature": self.signature,
         }
 

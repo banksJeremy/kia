@@ -109,7 +109,7 @@ class ByteArray(bytearray):
          lambda data: ByteArray(base64.b64decode(bz2.decompress(data))))
     ]
     
-    def to_json_equivilent(self, encoding_limit=None):
+    def to_json_equivalent(self, encoding_limit=None):
         # We use the most compact encoding not beyond encoding_limit.
         
         best_len = None
@@ -133,7 +133,7 @@ class ByteArray(bytearray):
         return best_encoded
     
     @classmethod
-    def from_json_equivilent(cls, o):
+    def from_json_equivalent(cls, o):
         encoding = o.get("encoding", cls.json_default_encoding)
         
         assert isinstance(o["data"], (str, unicode))

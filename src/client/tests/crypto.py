@@ -74,7 +74,7 @@ class BlahTests(unittest.TestCase):
         
         test_private(private) # original key
         
-        private = crypto.RSAKey.from_json_equivilent(private.to_json_equivilent())
+        private = crypto.RSAKey.from_json_equivalent(private.to_json_equivalent())
         test_private(private) # after going through JSON
         
         private = crypto.RSAKey("private", private.data)
@@ -86,7 +86,7 @@ class BlahTests(unittest.TestCase):
         public = private.public
         test_public(public) # after extraction from private key
         
-        public = crypto.RSAKey.from_json_equivilent(public.to_json_equivilent())
+        public = crypto.RSAKey.from_json_equivalent(public.to_json_equivalent())
         test_public(public) # after going through JSON
         
         public = crypto.RSAKey("public", public.data)

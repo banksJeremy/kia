@@ -182,27 +182,27 @@ class ByteArrayTests(unittest.TestCase):
             }
         }''')
         
-        j = lambda o, e=None: repr(json.dumps(o.to_json_equivilent(e)))
+        j = lambda o, e=None: repr(json.dumps(o.to_json_equivalent(e)))
         
-        assert json.dumps(original.to_json_equivilent()) == '{"data":"AAECAwUJ","encoding":"base64"}'
-        assert json.dumps(original2.to_json_equivilent()) == '{"data":"Hello, World!!"}'
-        assert json.dumps(original3.to_json_equivilent()) == '{"data":"SGVsbG8sIFdvcmxkISEAAAAAAAA=","encoding":"base64"}'
-        assert json.dumps(original4.to_json_equivilent()) == '{"data":"SGVsbG8sIFdvcmxkISEAAAAAAAAA","encoding":"base64"}'
-        assert json.dumps(original5.to_json_equivilent()) == '{"data":"QlpoOTFBWSZTWbDiqHEAAkl/gARUQABQD//yf///8L////pAAryZ1J2y7OKjU9I00NB6mmRo9QyD0nqaBiGINNA0aNBFNTEwKabCNMTJ6maSeaiaeJlPATEoDQNCKm0p6YjT0no1T9E01PTKPJkwp5DR6IZTQABoJQVI9TRoBtMoPKAeo0PKGg09RsoaDQ0PUzALLM9LY7o6Dsw9oBAgBCNETXZf4Mm00ub3lZShiepYF3/zU0yEvLeV0HYdRmdVLqy0cEsNO7QuWkhAHnHCVULlqeVT/kxYpofAaQHu/NaVp4/abYol26mDzE/HkZSQ39GqAo0k0Fpvf2I1tei3IUf0MBeyIPxF7sjCP7TLKZga+tXvE46LT9POJpD4q0BX+Q5xcG/1w/rHyqqSGQf+FS/QlttlGTFvQdzbLFL30UDMAA+B6HUoFn+Gr59rnREUR9bPOrwnJhGifpLYKGyJ1B+0ikefj0b4ZzzRO9yflViGZJrqhuYfgPe8QkjeTCJsgi0wCgMWjXshrJzW5IjWzPiIOBdtTfmcdgchwtVBxZPxkG+56+Sdzh7HxMzv75tak86yvCLmczLeOvL1jHKrnuNojmIiroWt6S5nudFzpOx21ihopHVTmdc3FFtVzUyHZsX4txHR75Rv75xzsApAIIb9ob045TqPRsOKpaWNkvFqFseLVuTjyDt+MZSeiQW11SLPWTWdZPXFhTATgrRFZPI+7XmoS9HLsxFJKgNLbIpQjqSHDx/hgUmAyYERpgSmB5Xde0FWGO53LNUG4QoNt60W8sfpBX0QFFjJcx3e2ZcWHqv1+MmxGYDd4ZEph2M4AxX6mA4PiQKfUC4/FDTgDlPlMnrFMVkobAJoNyNXygjpjKuuCCNLZOUHlzBD0YiDYv74j3PzTsyM1Avu2z6GE+l6vEqY6jQygnAHwZL0v02SINqbm++B8LriGPa3ZTZMidQ9cuaf3Lm7U89DZU247vO+4wTNxrMsAYcYIPogsB7WZJS0rpDaCjSkpJduh0YAkcOA6oM3ESB6O9Ytl/htbbaaGny6MwLalIB1cNbBGF24ABOu4ux5iY7fpSD3UAe63IMu3W5MwH0BqHYGBfPRsJj0R6dwRKqRoCyl1eGRLZzY1d2jRba5eRxYW5K5uus1OtNfncIwVGqqlrPWWbkkmQt2p/PBURNO2O/JF8ZAn+srMWf4u5IpwoSFhxVDiA==","encoding":"bzip2-base64"}'
+        assert json.dumps(original.to_json_equivalent()) == '{"data":"AAECAwUJ","encoding":"base64"}'
+        assert json.dumps(original2.to_json_equivalent()) == '{"data":"Hello, World!!"}'
+        assert json.dumps(original3.to_json_equivalent()) == '{"data":"SGVsbG8sIFdvcmxkISEAAAAAAAA=","encoding":"base64"}'
+        assert json.dumps(original4.to_json_equivalent()) == '{"data":"SGVsbG8sIFdvcmxkISEAAAAAAAAA","encoding":"base64"}'
+        assert json.dumps(original5.to_json_equivalent()) == '{"data":"QlpoOTFBWSZTWbDiqHEAAkl/gARUQABQD//yf///8L////pAAryZ1J2y7OKjU9I00NB6mmRo9QyD0nqaBiGINNA0aNBFNTEwKabCNMTJ6maSeaiaeJlPATEoDQNCKm0p6YjT0no1T9E01PTKPJkwp5DR6IZTQABoJQVI9TRoBtMoPKAeo0PKGg09RsoaDQ0PUzALLM9LY7o6Dsw9oBAgBCNETXZf4Mm00ub3lZShiepYF3/zU0yEvLeV0HYdRmdVLqy0cEsNO7QuWkhAHnHCVULlqeVT/kxYpofAaQHu/NaVp4/abYol26mDzE/HkZSQ39GqAo0k0Fpvf2I1tei3IUf0MBeyIPxF7sjCP7TLKZga+tXvE46LT9POJpD4q0BX+Q5xcG/1w/rHyqqSGQf+FS/QlttlGTFvQdzbLFL30UDMAA+B6HUoFn+Gr59rnREUR9bPOrwnJhGifpLYKGyJ1B+0ikefj0b4ZzzRO9yflViGZJrqhuYfgPe8QkjeTCJsgi0wCgMWjXshrJzW5IjWzPiIOBdtTfmcdgchwtVBxZPxkG+56+Sdzh7HxMzv75tak86yvCLmczLeOvL1jHKrnuNojmIiroWt6S5nudFzpOx21ihopHVTmdc3FFtVzUyHZsX4txHR75Rv75xzsApAIIb9ob045TqPRsOKpaWNkvFqFseLVuTjyDt+MZSeiQW11SLPWTWdZPXFhTATgrRFZPI+7XmoS9HLsxFJKgNLbIpQjqSHDx/hgUmAyYERpgSmB5Xde0FWGO53LNUG4QoNt60W8sfpBX0QFFjJcx3e2ZcWHqv1+MmxGYDd4ZEph2M4AxX6mA4PiQKfUC4/FDTgDlPlMnrFMVkobAJoNyNXygjpjKuuCCNLZOUHlzBD0YiDYv74j3PzTsyM1Avu2z6GE+l6vEqY6jQygnAHwZL0v02SINqbm++B8LriGPa3ZTZMidQ9cuaf3Lm7U89DZU247vO+4wTNxrMsAYcYIPogsB7WZJS0rpDaCjSkpJduh0YAkcOA6oM3ESB6O9Ytl/htbbaaGny6MwLalIB1cNbBGF24ABOu4ux5iY7fpSD3UAe63IMu3W5MwH0BqHYGBfPRsJj0R6dwRKqRoCyl1eGRLZzY1d2jRba5eRxYW5K5uus1OtNfncIwVGqqlrPWWbkkmQt2p/PBURNO2O/JF8ZAn+srMWf4u5IpwoSFhxVDiA==","encoding":"bzip2-base64"}'
         
-        assert json.dumps(original.to_json_equivilent("text")) != json.dumps(original.to_json_equivilent("base64"))
-        assert json.dumps(original2.to_json_equivilent("text")) != json.dumps(original2.to_json_equivilent("base64"))
-        assert json.dumps(original3.to_json_equivilent("text")) != json.dumps(original3.to_json_equivilent("base64"))
-        assert json.dumps(original4.to_json_equivilent("text")) != json.dumps(original4.to_json_equivilent("base64"))
+        assert json.dumps(original.to_json_equivalent("text")) != json.dumps(original.to_json_equivalent("base64"))
+        assert json.dumps(original2.to_json_equivalent("text")) != json.dumps(original2.to_json_equivalent("base64"))
+        assert json.dumps(original3.to_json_equivalent("text")) != json.dumps(original3.to_json_equivalent("base64"))
+        assert json.dumps(original4.to_json_equivalent("text")) != json.dumps(original4.to_json_equivalent("base64"))
         
-        assert len(json.dumps(original.to_json_equivilent())) <= len(json.dumps(original.to_json_equivilent("base64")))
-        assert len(json.dumps(original.to_json_equivilent())) <= len(json.dumps(original.to_json_equivilent("text")))
-        assert len(json.dumps(original2.to_json_equivilent())) <= len(json.dumps(original2.to_json_equivilent("base64")))
-        assert len(json.dumps(original2.to_json_equivilent())) <= len(json.dumps(original2.to_json_equivilent("text")))
-        assert len(json.dumps(original3.to_json_equivilent())) <= len(json.dumps(original3.to_json_equivilent("base64")))
-        assert len(json.dumps(original3.to_json_equivilent())) <= len(json.dumps(original3.to_json_equivilent("text")))
-        assert len(json.dumps(original4.to_json_equivilent())) <= len(json.dumps(original4.to_json_equivilent("base64")))
-        assert len(json.dumps(original4.to_json_equivilent())) <= len(json.dumps(original4.to_json_equivilent("text")))
+        assert len(json.dumps(original.to_json_equivalent())) <= len(json.dumps(original.to_json_equivalent("base64")))
+        assert len(json.dumps(original.to_json_equivalent())) <= len(json.dumps(original.to_json_equivalent("text")))
+        assert len(json.dumps(original2.to_json_equivalent())) <= len(json.dumps(original2.to_json_equivalent("base64")))
+        assert len(json.dumps(original2.to_json_equivalent())) <= len(json.dumps(original2.to_json_equivalent("text")))
+        assert len(json.dumps(original3.to_json_equivalent())) <= len(json.dumps(original3.to_json_equivalent("base64")))
+        assert len(json.dumps(original3.to_json_equivalent())) <= len(json.dumps(original3.to_json_equivalent("text")))
+        assert len(json.dumps(original4.to_json_equivalent())) <= len(json.dumps(original4.to_json_equivalent("base64")))
+        assert len(json.dumps(original4.to_json_equivalent())) <= len(json.dumps(original4.to_json_equivalent("text")))
         
 
 class BinaryInterfaceTests(unittest.TestCase):
