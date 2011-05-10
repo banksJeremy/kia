@@ -7,16 +7,21 @@ import binary
 import crypto
 import json_serialization
 
-json = json_serialization.JSONSerializer({
+json_types = {
     "rsa-key": crypto.RSAKey,
     "signed-binary": crypto.SignedBinary,
     "binary": binary.ByteArray
-})
+}
 
 def main(command=None, *args):
+    json = json_serialization.JSONSerializer(json_types)
+    
     if command == "key":
         subcommand = args[0]
         subargs = args[1:]
+        
+        if "--pretty" in subargs:
+            json = json_serialization.JSONSerializer(json_types, indent=2, separators=(", ", ": "))
         
         if "--transparent" in subargs:
             json.root_options["transparent"] = True
