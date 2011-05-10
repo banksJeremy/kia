@@ -7,7 +7,7 @@ import binary
 import crypto
 import json_serialization
 
-json = json_serialization.JsonSerializer({
+json = json_serialization.JSONSerializer({
     "rsa-key": crypto.RSAKey,
     "signed-binary": crypto.SignedBinary,
     "binary": binary.ByteArray
@@ -113,8 +113,3 @@ class JsonRpcInterface(object):
         
         except Exception, e:
             return "Update failed:", e
-
-if __name__ == "__main__":
-    import sys
-    
-    sys.exit(main(*sys.argv[1:]))

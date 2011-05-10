@@ -10,7 +10,7 @@ import zlib
 import binary
 import json_serialization
 
-json = json_serialization.JsonSerializer()
+json = json_serialization.JSONSerializer()
 
 class ByteArray(bytearray):
     """An more binary-useful extension of the bytearray type."""

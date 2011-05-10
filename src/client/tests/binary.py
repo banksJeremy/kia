@@ -9,7 +9,7 @@ sys.path[0:0] = [".."]
 import binary
 import json_serialization
 
-json = json_serialization.JsonSerializer()
+json = json_serialization.JSONSerializer()
 
 class ByteArrayTests(unittest.TestCase):
     """Basic, non-comprehensive tests for binary.ByteArray."""

@@ -12,7 +12,7 @@ import binary
 
 import json_serialization
 
-json = json_serialization.JsonSerializer({
+json = json_serialization.JSONSerializer({
     "rsa-key": crypto.RSAKey,
     "binary": binary.ByteArray,
     "signed-binary": crypto.SignedBinary

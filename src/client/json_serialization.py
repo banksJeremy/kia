@@ -19,7 +19,7 @@ class JSONSerializer(object):
         else:
             self.types = None
         
-        self.root_options = options
+        self.root_options = root_options
         
         if type_property is None:
             self.type_property = self.default_type_property
@@ -30,9 +30,6 @@ class JSONSerializer(object):
         if indent is None:
             indent = self.default_indent
         
-        if sort_keys is not None:
-            self.sort_keys = sort_keys
-        
         self.raw_encoder = json.JSONEncoder(
             allow_nan=False,
             sort_keys=True,
@@ -41,16 +38,22 @@ class JSONSerializer(object):
             default=self.produce_json_equivalent
         )
         
-        self.dump = self.raw_encoder.dump
-        self.dumps = self.raw_encoder.dumps
-        
         self.raw_decoder = json.JSONDecoder(
             object_hook=self.parse_json_equivalent,
             parse_constant=self._parse_constant
         )
-        
-        self.load = self.raw_decoder.load
-        self.loads = self.raw_decoder.loads
+    
+    def dump(self, o, fp):
+        fp.write(self.dumps(o))
+    
+    def dumps(self, o):
+        return self.raw_encoder.encode(o)
+    
+    def load(self, fp):
+        return self.loads(fp.read())
+    
+    def loads(self, s):
+        return self.raw_decoder.decode(s)
     
     _constants = {
         "true": True,
@@ -72,6 +75,7 @@ class JSONSerializer(object):
         for type_name, cls in self.types.items():
             if isinstance(o, cls):
                 json_type = type_name
+                break
         else:
             raise TypeError("Type not known to serializer: {}"
                             .format(type(o).__name__))
