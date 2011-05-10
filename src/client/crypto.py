@@ -154,7 +154,7 @@ class RSAKey(object):
         
         return result
     
-    def to_json_equivalent(self, transparent=False):
+    def to_dynamic_json_equivalent(self, recur, transparent=False, **options):
         o = {
             "data": self.data
         }
@@ -173,7 +173,6 @@ class SignedBinary(object):
         self.key = key
         self.signature = signature
         
-        print(self.key)
         assert isinstance(self.key, RSAKey)
         
         self.key.verify(data, signature)

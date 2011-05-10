@@ -25,7 +25,7 @@ class JSONSerializer(object):
             self.type_property = self.default_type_property
         
         if separators is None:
-            self.separators = self.default_separators
+            separators = self.default_separators
         
         if indent is None:
             indent = self.default_indent
@@ -67,7 +67,7 @@ class JSONSerializer(object):
     def parse_json_equivalent(self, o):
         if self.type_property in o and o[self.type_property] in self.types:
             return (self.types[o[self.type_property]]
-                    .from_json_equivalent(o, *self.options))
+                    .from_json_equivalent(o))
         else:
             return o
     
@@ -80,16 +80,20 @@ class JSONSerializer(object):
             raise TypeError("Type not known to serializer: {}"
                             .format(type(o).__name__))
         
-        if options is None:
-            options = self.root_options
-        
         if hasattr(o, "to_dynamic_json_equivalent"):
+            if options is None:
+                options = self.root_options
+            
             def recur(o, **changes):
                 return self.produce_json_equivalent(o, dict(options, **changes))
             
-            return o.to_dynamic_json_equivalent(recur, **options)
+            result = o.to_dynamic_json_equivalent(recur, **options)
         elif hasattr(o, "to_json_equivalent"):
-            return o.to_json_equivalent()
+            result = o.to_json_equivalent()
         else:
             raise TypeError("{}s can not be JSON-serialized."
                             .format(type(o).__name__))
+        
+        result[self.type_property] = json_type
+        
+        return result

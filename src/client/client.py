@@ -13,21 +13,19 @@ json = json_serialization.JSONSerializer({
     "binary": binary.ByteArray
 })
 
-
 def main(command=None, *args):
     if command == "key":
         subcommand = args[0]
         subargs = args[1:]
         
+        if "--transparent" in subargs:
+            json.root_options["transparent"] = True
+        
         if subcommand == "generate":
-            assert not subargs, "command takes no arguments"
-            
             json.dump(crypto.RSAKey(), sys.stdout)
             sys.stderr.write("\n")
     
         elif subcommand == "public":
-            assert not subargs, "command takes no arguments"
-            
             json.dump(json.load(sys.stdin).public, sys.stdout)
             sys.stderr.write("\n")
     
