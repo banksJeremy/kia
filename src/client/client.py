@@ -111,3 +111,7 @@ class JsonRpcInterface(object):
         
         except Exception, e:
             return "Update failed:", e
+
+
+if __name__ == "__main__":
+    sys.exit(main(*sys.argv[1:]))
