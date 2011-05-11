@@ -82,8 +82,7 @@ class JSONSerializer(object):
                 json_type = type_name
                 break
         else:
-            raise TypeError("Type not known to serializer: {}"
-                            .format(type(o).__name__))
+            return o
         
         if hasattr(o, "to_dynamic_json_equivalent"):
             if options is None:

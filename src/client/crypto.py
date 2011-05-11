@@ -132,7 +132,7 @@ class RSAKey(object):
         return binary.ByteArray(signature)
     
     def wrap_signature(self, data):
-        return SignedBinary(data, self.public, self.sign(data))
+        return SignedBinary(binary.ByteArray(data), self.public, self.sign(data))
     
     def verify(self, data, signature, hash_name=None, padding=None, salt_length=None):
         """Verifies a signature for some data using this key.
