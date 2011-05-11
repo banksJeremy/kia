@@ -3,7 +3,8 @@ from __future__ import division, print_function, unicode_literals
 
 import argparse
 
-arg_parser = argparse.ArgumentParser()
+arg_parser = argparse.ArgumentParser(prog="kia")
+
 arg_parser.add_argument("-p", "--pretty",
     help="format JSON for people instead of for software",
     action="store_const", const=True)
@@ -86,14 +87,14 @@ def main(*raw_args):
         in_ = open_filename(args.key, "r")
         out = open_filename(args.public_key, "w")
         
-        json.dump(json.load(in_).public, out)
+        json.dump(json.load(in_, crypto.RSAKey).public, out)
     
     elif args.command == "sign":
         key_file = open_filename(args.key, "r")
         in_ = open_filename(args.raw_data, "r")
         out = open_filename(args.signed_data, "w")
         
-        key = json.load(key_file)
+        key = json.load(key_file, crypto.RSAKey)
         signed = key.sign(in_.read())
         
         json.dump(signed, out)

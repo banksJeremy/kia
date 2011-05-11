@@ -49,11 +49,16 @@ class JSONSerializer(object):
     def dumps(self, o):
         return self.raw_encoder.encode(o)
     
-    def load(self, fp):
-        return self.loads(fp.read())
+    def load(self, fp, req_type=None):
+        return self.loads(fp.read(), req_type)
     
-    def loads(self, s):
-        return self.raw_decoder.decode(s)
+    def loads(self, s, req_type=None):
+        result = self.raw_decoder.decode(s)
+        
+        if req_type is not None and not isinstance(result, req_type):
+            raise TypeError("Decoded JSON object does not match required type.")
+        
+        return result
     
     _constants = {
         "true": True,
