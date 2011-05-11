@@ -1,18 +1,24 @@
 <!doctype html>
 <html>
   <head>
-    <title>dNeSQue Background Page</title>
-  </head>
-  <body>
+    <title>dNeSQue Browser</title>
+    <script src="jquery-1.6.min.js"></script>
     <script>
-      var handleRequestSent = function(details) {
-        console.log("SEN?!")
-        console.log(details)
-    }
-      
-    chrome.experimental.webRequest.onRequestSent.addListener(handleRequestSent)
-      
-    console.log("Listening...")
+      var main = function() {
+        $("base").remove()
+        $("<base>", {"href": "browser.html?/"}).appendTo($("head"))
+        $("<a>", {"text": "foo", "href": "bhaaa"}).appendTo($("body"))
+        $.ajax("http://66.228.39.163/_dnesque.json", {
+          headers: {
+            "Host": "jeremybanks.com",
+            "If-None-Match": "previous response headers etag"
+          },
+          crossDomain: false
+        }).then(function(_, _, o) {
+          console.log(o.getAllResponseHeaders())
+        })
+      }
     </script>
-  </body>
+  </head>
+  <body><script>$(main)</script></body>
 </html>

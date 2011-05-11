@@ -4,10 +4,6 @@
   "description":    "hmm...",
   "background_page": "background.html",
   "permissions":  [
-    "experimental",
-      "extension",
-    "webNavigation",
-    "web_progress",
-    "*://*"
+    "*://*/"
   ]
 }
