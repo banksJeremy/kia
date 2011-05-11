@@ -1,18 +1,18 @@
-dNeSQue
+kia
 =======
 
-<https://github.com/jeremybanks/dnesque>
+<https://github.com/jeremybanks/kia>
 
-dNeSQue is a system allowing site owners to associate an RSA key with their site. Clients can use this key and dNeSQue records made available by site to authenticate future changes to the domain's DNS information.
+kia is a system allowing site owners to associate an RSA key with their site. Clients can use this key and dNeSQue records made available by site to authenticate future changes to the domain's DNS information.
 
-Please see <https://github.com/jeremybanks/dnesque/wiki> for more information.
+Please see <https://github.com/jeremybanks/kia/wiki> for more information.
 
 License and Credits
 -------------------
 
 This software and related files are released under the [CC0 1.0 Public Domain Dedication](http://creativecommons.org/publicdomain/zero/1.0/).
 
-dNeSQue was created by Jeremy Banks <<jeremy@jeremybanks.ca>>. A full list of contributors [may be found though GitHub](https://github.com/jeremybanks/dnesque/contributors).
+dNeSQue was created by Jeremy Banks <<jeremy@jeremybanks.ca>>. A full list of contributors [may be found though GitHub](https://github.com/jeremybanks/kia/contributors).
 
 dNeSQue may use the following software/libraries. They are available under MIT/BSD-style licenses:
 
