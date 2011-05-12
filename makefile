@@ -1,13 +1,19 @@
-python = python2.7
+pyv = 2.7
 
 # Commands
 # ========
 
-.PHONY: help test-all all bin clean purge install-virtualenv-and-pip __main
+.PHONY: clean build install __main
 
 __main:
-	make help
-	make test-all
+	make build
+
+install:
+	python$(pyv) setup.py build
+
+build:
+	python$(pyv) setup.py install
+
 
 help:
 	#   There's nothing to actually make yet, just dependencies.
@@ -29,26 +35,11 @@ help:
 	#   
 	#   make clean    - all removes build files.
 	#   make purge    - removes all build files, libraries and software.
-	#   
-	# documentation might be available at github.com/jeremybanks/dnesque.
-
-test-all: all
-	for path in src/*/tests; do cd $$path; for test in *.py ; do ./$$test; done; done;
 
 purge: clean
 	# Removing Built Files and Requirements
 	# =====================================
 	rm -rf bin/ dist/ lib/ .Python node_modules/
-
-install-virtualenv-and-pip:
-	# Downloading and Installing distribute, pip and virtualenv (globally)
-	# ====================================================================
-	$(python) -c "import distutils"  || \
-	curl http://python-distribute.org/distribute_setup.py | "$(python)"
-	$(python) -c "import pip"        || \
-	curl https://github.com/pypa/pip/raw/1.0/contrib/get-pip.py | "$(python)"
-	$(python) -c "import virtualenv" || \
-	pip install virtualenv
 
 dist/:
 	# Making Build Directory

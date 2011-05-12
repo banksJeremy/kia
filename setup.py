@@ -2,6 +2,7 @@
 import setuptools 
 import datetime
 
+# generate times
 version = datetime.datetime.utcnow().strftime("0.0.dev-%Y-%m-%dT%H%MZ")
 pypi_download_url = "http://pypi.python.org/pypi/kia/" + version
 
