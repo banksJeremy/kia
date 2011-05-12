@@ -4,6 +4,8 @@ from __future__ import division, print_function, unicode_literals
 import argparse
 import codecs
 
+import sys
+
 arg_parser = argparse.ArgumentParser()
 
 arg_parser.add_argument("-p", "--pretty",
@@ -125,7 +127,10 @@ def open_filename(filename, mode, encoding="utf-8"):
     else:
         return open(filename, mode)
 
-def main(*raw_args):
+def main(raw_args=None):
+    if raw_args is None:
+        raw_args = sys.argv[1:]
+    
     args = arg_parser.parse_args(raw_args)
     
     json = json_serialization.JSONSerializer(json_types,
@@ -159,6 +164,4 @@ def main(*raw_args):
         raise NotImplementedError()
 
 if __name__ == "__main__":
-    import sys
-    
-    sys.exit(main(*sys.argv[1:]))
+    sys.exit(main())

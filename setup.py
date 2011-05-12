@@ -1,5 +1,7 @@
+#!/usr/bin/env python2.7
 import setuptools 
 import datetime
+import os.path
 
 version = datetime.datetime.utcnow().strftime("0.0.dev-%Y-%m-%dT%H%MZ")
 pypi_download_url = "http://pypi.python.org/pypi/kia/" + version
@@ -11,7 +13,7 @@ setuptools.setup(
     url = "https://github.com/jeremybanks/kia/",
     download_url = pypi_download_url,
     
-    description = "Very neato.",
+    description = "kia does neat things that will be explained...",
     
     packages = ["kia"],
     
@@ -26,7 +28,8 @@ setuptools.setup(
     
     package_dir = {"": "src/"},
     
-    long_description = open("readme.rst").read(),
+    long_description = open(os.path.join(os.path.dirname(__file__),
+                                         "readme.rst")).read(),
     
     classifiers = [
         "Programming Language :: Python",
