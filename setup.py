@@ -1,8 +1,6 @@
-#!bin/python2.7
 import setuptools 
 import datetime
 
-# generate times
 version = datetime.datetime.utcnow().strftime("0.0.dev-%Y-%m-%dT%H%MZ")
 pypi_download_url = "http://pypi.python.org/pypi/kia/" + version
 
@@ -28,7 +26,7 @@ setuptools.setup(
     
     package_dir = {"": "src/"},
     
-    long_description = "Very, very neato.",
+    long_description = open("readme.rst").read(),
     
     classifiers = [
         "Programming Language :: Python",
