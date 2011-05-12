@@ -1,4 +1,4 @@
-pyv = 2.7
+python = python2.7
 
 .PHONY: __main build install clean distribute
 
@@ -6,13 +6,13 @@ __main:
 	make build
 
 build:
-	python$(pyv) setup.py build
+	$(python) setup.py build
 
 install:
-	python$(pyv) setup.py install
+	$(python) setup.py install
 
 clean:
-	rm -rf *.pyc */*.pyc */*/*.pyc include/ build/
+	rm -rf build/ dist/ *.pyc */*.pyc */*/*.pyc
 
 distribute:
-	python$(pyv) setup.py register sdist --formats=zip,gztar upload
+	$(python) setup.py register sdist --formats=zip,gztar upload
