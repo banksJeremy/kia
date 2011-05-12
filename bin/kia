@@ -1,2 +1,0 @@
-#!/usr/bin/env bash
-`dirname "$0"`/python `dirname "$0"`/../src/client/__main__.py "$@"

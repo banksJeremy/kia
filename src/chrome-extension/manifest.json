@@ -1,9 +1,0 @@
-{
-  "name":           "dNeSQue Chrome Plugin",
-  "version":        "0.1",
-  "description":    "hmm...",
-  "background_page": "background.html",
-  "permissions":  [
-    "*://*/"
-  ]
-}

@@ -4,7 +4,7 @@ from __future__ import division, print_function, unicode_literals
 import argparse
 import codecs
 
-arg_parser = argparse.ArgumentParser(prog="kia")
+arg_parser = argparse.ArgumentParser()
 
 arg_parser.add_argument("-p", "--pretty",
     help="format JSON for people instead of for software",
