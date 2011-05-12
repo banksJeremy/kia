@@ -5,7 +5,7 @@ https://github.com/jeremybanks/kia
 
 kia is a system allowing site owners to associate an RSA key with their site. Clients can use this key and kia records made available by site to authenticate future changes to the domain's DNS information.
 
-You can install kia using `easy_install kia` or `pip kia`.
+kia is in the Python Package Index (PyPi), so you can install it with ``easy_install kia`` or ``pip kia``.
 
 Please see https://github.com/jeremybanks/kia/wiki for more information.
 
