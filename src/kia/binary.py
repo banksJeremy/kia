@@ -1,10 +1,12 @@
-#!../../bin/python2.7
+#!/usr/bin/env python2.7
 from __future__ import division, print_function, unicode_literals
 
 import base64
 import bz2
+import collections
 import itertools
 import math
+import urllib
 import zlib
 
 import binary
@@ -94,55 +96,80 @@ class ByteArray(bytearray):
     
     json_default_encoding = "text"
     
-    json_encodings = [
-        ("text",
-         lambda data: "".join(map(unichr, data)),
-         lambda data: ByteArray(map(ord, data))),
-        ("base64",
-         lambda data: base64.b64encode(data),
-         lambda data: ByteArray(base64.b64decode(data))),
-        ("zlib-base64",
-         lambda data: base64.b64encode(zlib.compress(bytes(data), 9)),
-         lambda data: ByteArray(base64.b64decode(zlib.decompress(data)))),
-        ("bzip2-base64",
-         lambda data: base64.b64encode(bz2.compress(data, 9)),
-         lambda data: ByteArray(base64.b64decode(bz2.decompress(data))))
-    ]
+    json_encodings = collections.OrderedDict((
+        ("text", (lambda data: "".join(map(unichr, data)),
+                  lambda s: ByteArray(map(ord, s)))),
+        ("percent", (lambda data: urllib.quote(data, ""),
+                     lambda s: urllib.unquote_plus(s))),
+        ("base64", (lambda data: base64.b64encode(data),
+                    lambda s: ByteArray(base64.b64decode(s))))
+    ))
     
-    def to_dynamic_json_equivalent(self, recur, encoding_limit=False, **options):
-        # We use the most compact encoding not beyond encoding_limit.
-        
+    json_compressions = collections.OrderedDict((
+        ("zlib", (lambda data: zlib.compress(bytes(data), 9),
+                  lambda data: ByteArray(zlib.decompress(data)))),
+        ("bzip2", (lambda data: bz2.compress(data, 9),
+                   lambda data: ByteArray(bz2.decompress(data))))
+    ))
+    
+    def to_dynamic_json_equivalent(self, recur,
+                                   required_encoding=None,
+                                   allow_compression=True, **options):
         best_len = None
-        best_encoding = None
+        best_equivalent = None
         
-        for encoding, encode, decode in self.json_encodings:
-            encoded = { "data": encode(self) }
-            
-            if encoding != self.json_default_encoding:
-                encoded["encoding"] = encoding
-            
-            jsoned = json.dumps(encoded)
-            
-            if best_len is None or len(jsoned) < best_len:
-                best_encoded = encoded
-                best_len = len(jsoned)
-            
-            if encoding == encoding_limit:
-                break
+        best_compressed = self
+        best_compression = None
         
-        return best_encoded
+        if isinstance(required_encoding, (str, unicode)):
+            required_encoding = set([required_encoding])
+        
+        for encoding, compression in (("text", None),
+                                      ("percent", None),
+                                      ("base64", None),
+                                      ("base64", "zlib"),
+                                      ("base64", "bzip2")):
+            if required_encoding is not None and encoding not in required_encoding:
+                continue
+            
+            if compression:
+                compressed = self.json_compressions[compression][0](self)
+                equivalent = { "data": self.json_encodings[encoding][0](compressed),
+                               "encoding": "-".join((encoding, compression)) }
+            else:
+                equivalent = { "data": self.json_encodings[encoding][0](self) }
+                
+                if encoding != self.json_default_encoding:
+                    equivalent["encoding"] = encoding
+                
+            encoded = json.dumps(equivalent)
+            
+            if best_len is None or len(encoded) < best_len:
+                best_equivalent = equivalent
+                best_len = len(encoded)
+        
+        if best_equivalent is None:
+            raise ValueError("Unknown encoding.", required_encoding)
+        
+        return best_equivalent
     
     @classmethod
     def from_json_equivalent(cls, o):
-        encoding = o.get("encoding", cls.json_default_encoding)
+        encoding_name = o.get("encoding", cls.json_default_encoding)
         
         assert isinstance(o["data"], (str, unicode))
         
-        for possible_encoding, encode, decode in cls.json_encodings:
-            if possible_encoding == encoding:
-                return decode(o["data"])
+        if "-" in encoding_name:
+            encoding_name, compression_name = encoding_name.split("-")
+            
+            decompress = cls.json_compressions[compression][1]
+            decode = cls.json_encodings[encoding_name][1]
+            
+            return decompress(decode(o["data"]))
         else:
-            raise "Unknown encoding: {}".format(encoding)
+            decode = cls.json_encodings[encoding_name][1]
+            
+            return decode(o["data"])
 
 class BinaryInterface(object):
     """An bit-level sequence interface for ByteArrays."""

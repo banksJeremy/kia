@@ -1,4 +1,4 @@
-#!../../bin/python2.7
+#!/usr/bin/env python2.7
 from __future__ import division, print_function, unicode_literals
 
 import argparse
@@ -128,9 +128,6 @@ def open_filename(filename, mode, encoding="utf-8"):
         return open(filename, mode)
 
 def main(raw_args=None):
-    if raw_args is None:
-        raw_args = sys.argv[1:]
-    
     args = arg_parser.parse_args(raw_args)
     
     json = json_serialization.JSONSerializer(json_types,

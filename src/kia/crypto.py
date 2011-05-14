@@ -1,4 +1,4 @@
-#!../../bin/python2.7
+#!/usr/bin/env python2.7
 """
 This module wraps some features of OpenSSL via M2Crypto.
 

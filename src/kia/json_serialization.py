@@ -1,4 +1,4 @@
-#!../../bin/python2.7
+#!/usr/bin/env python2.7
 from __future__ import division, print_function, unicode_literals
 
 import base64
@@ -12,8 +12,8 @@ class JSONSerializer(object):
     default_indent = None
     default_separators = (",", ":")
     
-    def __init__(self, types=None, type_property=None,
-                 indent=None, separators=None, **root_options):
+    def __init__(self, types=None, type_property=None, indent=None, 
+                 separators=None, ensure_ascii=True, **root_options):
         if types:
             self.types = dict(types)
         else:
@@ -34,6 +34,7 @@ class JSONSerializer(object):
             allow_nan=False,
             sort_keys=True,
             indent=indent,
+            ensure_ascii=ensure_ascii,
             separators=separators,
             default=self.produce_json_equivalent
         )

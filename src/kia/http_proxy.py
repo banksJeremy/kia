@@ -64,5 +64,9 @@ class KiaProxy(twisted.web.proxy.Proxy):
 class KiaHTTPProxyFactory(twisted.web.http.HTTPFactory):
     protocol = KiaProxy
 
-twisted.internet.reactor.listenTCP(12804, KiaHTTPProxyFactory())
-twisted.internet.reactor.run()
+def main():
+    twisted.internet.reactor.listenTCP(12804, KiaHTTPProxyFactory())
+    twisted.internet.reactor.run()
+
+if __name__ == "__main__":
+    sys.exit(main(*sys.argv[1:]))
